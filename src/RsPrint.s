@@ -13,6 +13,10 @@
 ; %o - octagonal
 ; %b - binary
 
+;   b   c   d   o   s   x
+;   2d  2d  3d  14d 18d 23d
+;   62h 63h 64h 6Fh 73h 78h
+
 ;================================================
 
 %ifndef rsPrint
@@ -26,33 +30,207 @@ section .text
 
 ;-------------------RsPrint----------------------
 ;
-; Descr:
-; Entry:
-; Exit:
-; Desrt:
+; Descr: Prints string in terminal
+; Entry: Gains arguments in stack (CDECL)
+;        First arg  - format string
+;        Next  args - arguments for format string
+; Exit : None
+; Desrt: a lot
 ;-------------------------------------------------
 
-RsPrint
+RsPrint     
+            push rbp
+            mov rbp, rsp                ; make stack frame
 
+            mov rsi, [rbp + 16]         ; rbp -> start of format string
+            lea rbx, [rbp + 24]         ; rbx -> first argument
+
+            xor rdx, rdx                ; counter of symbols 
+
+            mov rax, 01h                ; 'write' syscall code
+            mov rdi, 01h                ; stdout
+
+        .loop
+            cmp byte [rsi + rdx], 0     ; if there EOL
+            je .fin
+
+            cmp byte [rsi + rdx], '%'   ; if there specifier
+            je .write 
+
+            inc rdx                     ; to next symbol
+            jmp .loop 
+
+        .write  
+            cmp rdx, 0                  ; if counter == 0
+            je .arg                     ; no need to write
+
+            syscall                     ; else write
+
+        .arg
+            call RsPrintArg             ; print argument
+            jmp .loop 
+
+        .fin
+            cmp rdx, 0                  ; if counter == 0
+            je .ret                     ; no need to write 
+
+            syscall                     ; else write
+
+        .ret 
+            pop rbp                     ; restore rbp value
             ret 
 
 ;------------------RsPrintArg---------------------
 ;
-; Descr:
-; Entry:
-; Exit:
+; Descr: Prints in terminal argument in the way
+;        according to specifier
+;
+; Entry: RSI + RDX -> % 
+;        RBX -> next arg to be printed
+;        RAX == 1 (write)
+;        RDI == 1 (stdout)
+;
+; Exit : RDX == 0
+;        RSI -> next symb after specifier
+;
 ; Destr:
 ;------------------------------------------------
 
-RsPrintArg
+RsPrintArg  
+
+            mov r8, byte [rsx + rdx + 1]    
+                                        ; get next symbol after '%'
+
+            cmp r8, '%'
+            je .casedefault
+
+            sub r8, 'b'                 ; r8 = offset of the symbol
+                                        ; from 'b' in ASCII table
+
+            cmp r8, 'x' - 1             ; if specifier is not recognized
+            ja .casedefault             ; print two symbol incuding '%'
+
+            mov r8, [.jmptable + r8 * 8]
+            jmp r8                      ; else jmp using table
+
+        .jmptable 
+            dq .binary                  ; %b
+            dq PrintChar                ; 1
+            dq .decimal                 ; 2
+            dq .casedefault             ; 3
+            dq .casedefault             ; 4
+            dq .casedefault             ; 5
+            dq .casedefault             ; 6
+            dq .casedefault             ; 7
+            dq .casedefault             ; 8
+            dq .casedefault             ; 9
+            dq .casedefault             ; 10
+            dq .casedefault             ; 11
+            dq .casedefault             ; 12
+            dq .octagonal               ; %o
+            dq .casedefault             ; 14
+            dq .casedefault             ; 15
+            dq .casedefault             ; 16
+            dq .string                  ; %s
+            dq .casedefault             ; 18
+            dq .casedefault             ; 19
+            dq .casedefault             ; 20
+            dq .casedefault             ; 21
+            dq .hexadecimal             ; %x
+
+        .binary
+            mov cl, 1
+            jmp .case2n
+
+        .octagonal
+            mov cl, 3
+            jmp .case2n
+
+        .hexadecimal
+            mov cl, 4
+            jmp .case2n
+
+        .decimal
+            call RsPrintArgDec
+            jmp .fin
+
+        .string
+            call RsPrintArgStr
+            jmp .fin
+
+        .case2n
+            call RsPrint2nArg
+            jmp .fin 
+
+        .casedefault
+            mov rdx, 2                  ; write "%%"
+            syscall 
+
+        .fin 
+            xor rdx, rdx                ; counter = 0
+            add rsi, 2                  ; rsi -> next sym after specifier
 
             ret 
 
-;-------------------------------------------------
+;------------------RsPrintArgDec-----------------
+;
+; Descr:
+;
+; Entry:
+;
+; Exit :
+;
+; Destr:
+;------------------------------------------------
+
+RsPrintArgDec
+
+            ret 
+
+;------------------RsPrintArg2n------------------
+;
+; Descr:
+;
+; Entry:
+;
+; Exit :
+;
+; Destr:
+;------------------------------------------------
+
+RsPrintArg2n
+
+            ret 
+
+;------------------RsPrintArgStr-----------------
+;
+; Descr:
+;
+; Entry:
+;
+; Exit:
+;
+; Destr:
+;------------------------------------------------
+
+RsPrintArgStr
+
+            ret 
+
+;-------------------RsWriteStr-------------------
+;
+; Descr: writes particular number of symbols in 
+;        terminal using 'write' Linux system call 
+;
+; Entry: 
+; Exit:
+;
+; Destr:
+;------------------------------------------------
 
 section .bss  
 
-PrintItoaBuf: resb 64                 ; buffer used for itoa
+PrintArgBuf: resb 64                 ; buffer used for itoa
 
 ;================================================
 

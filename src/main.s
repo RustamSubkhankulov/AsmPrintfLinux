@@ -41,7 +41,11 @@ global _start
 
 _start:     
 
+            push TestString
 
+            call RsPrint
+
+            add rsp, 8
 
             ;lea rdi, [TestString]
 
@@ -67,7 +71,7 @@ _start:
 
 section .data 
 
-;TestString:          db "Hello World", 0
+TestString:          db "Hello World",0Ah, 0
 ;MainBuf:    times 64 db (1)
 
 
