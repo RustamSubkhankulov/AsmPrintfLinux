@@ -2,7 +2,7 @@
 ;                            (c) Rustamchik, 2022
 ;================================================
 
-.section text 
+section .text 
 
 ;====================Macro=======================
 
@@ -19,17 +19,21 @@
 
 ;==================Includes======================
 
-%include    print64.s                      
+%include    "print.s"                      
                                         ; printf function
-%include    itoa64.s           
+%include    "itoa.s"           
                                         ; itoa function
 
-;%include    strlen64.s                     
+%include    "strlen.s"                     
                                         ; strlen function
 
 ;%include unittest64.s                  
                                         ; unit tests for 
                                         ; printf function
+
+;================================================
+
+section .text 
 
 ;==================Main=Body=====================
 
@@ -39,7 +43,7 @@ _start:     mov r9, 10d
             mov rdi, MainBuf
             mov rbx, 256d
 
-            call Itoa64                 ; call Itoa64
+            call Itoa 
 
             mov rax, 01h                ; write
             mov rdi, 1                  ; stdout

@@ -1,5 +1,5 @@
-%ifndef Print64
-%define Print64 
+%ifndef Print
+%define Print 
 
 ;================================================
 
@@ -7,7 +7,7 @@ section .text
 
 ;==================FUNCTIONS=====================
 
-;-------------------Print64----------------------
+;--------------------Print-------------------------
 ;
 ; Descr:
 ; Entry:
@@ -15,11 +15,11 @@ section .text
 ; Desrt:
 ;-------------------------------------------------
 
-Print64
+Print
 
             ret 
 
-;-------------------PrintArg64--------------------
+;-------------------PrintArg----------------------
 ;
 ; Descr:
 ; Entry:
@@ -27,7 +27,7 @@ Print64
 ; Destr:
 ;------------------------------------------------
 
-Print64Arg
+PrintArg
 
             ret 
 
@@ -35,7 +35,7 @@ Print64Arg
 
 section .bss  
 
-Print64ItoaBuf: resb 64                 ; buffer used for itoa
+PrintItoaBuf: resb 64                 ; buffer used for itoa
 
 ;================================================
 

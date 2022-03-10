@@ -1,5 +1,5 @@
-%ifndef Itoa64
-%define Itoa64 
+%ifndef Itoa
+%define Itoa 
 
 ;================================================
 
@@ -7,7 +7,7 @@ section .text
 
 ;==================FUNCTIONS=====================
 
-;-------------------Itoa64-----------------------
+;--------------------Itoa------------------------
 ;
 ; Descr: translates number to string of symbols
 ;
@@ -21,7 +21,7 @@ section .text
 ; Destr: RAX, RDX
 ;------------------------------------------------
 
-Itoa64 
+Itoa
         mov rax, rbx                    ; get value for
                                         ; counting offset
         mov r8, 1                       ; at least ine symb in string
@@ -33,7 +33,7 @@ Itoa64
         cmp rax, 0                      ; cmp result with 0
         je .main                        ; if equal, jmp to main 
         inc r8                          ; increment addition counter
-        int rdi                         ; move to next symbol
+        inc rdi                         ; move to next symbol
 
         jmp .CountOffset
 
@@ -45,7 +45,7 @@ Itoa64
         xor rdx, rdx                    ; for division
         div r9                          ; divide by base 
 
-        mob dl, [rdx + XlatTable64]     ; converting symbol
+        mov dl, [rdx + XlatTable64]     ; converting symbol
 
         mov [rdi], dl                   ; place symbol in string
         dec rdi                         ; iterate to next one
@@ -55,7 +55,7 @@ Itoa64
         inc rdi                         ; di point to the start of string
         ret 
 
-;--------------------Itoa64_2--------------------
+;---------------------Itoa2n---------------------
 ;
 ; Descr: optimized version of the itoa64, made for
 ;        numeric sytems with base - power of two
@@ -71,19 +71,22 @@ Itoa64
 ; Destr: RAX, RBX
 ;------------------------------------------------
 
-Itoa64_2
+Itoa2n
+
+        push rcx                        ; save rcx value
+        mov rcx, r9                     ; cl = n
 
         mov rax, rbx                    ; get value for
                                         ; counting offset
         mov r8, 1                       ; at least ine symb in string
 
     .CountOffset
-        shr rax, r9
+        shr rax, cl 
         cmp rax, 0
-        le .loop 
+        je .loop 
 
         inc r8                          ; increment addition counter
-        int rdi                         ; move to next symbol
+        inc rdi                         ; move to next symbol
 
         jmp .CountOffset
 
@@ -95,12 +98,14 @@ Itoa64_2
         mov [rdi], bl                   ; store in sting
         dec rdi                         ; iterate to next
 
-        shr rbx, r9                     ; ax /= 2^base
+        shr rbx, cl                   ; ax /= 2^base
 
         cmp rax, 0                      
         jne .loop                       ; while (rax != 0)
 
         inc rdi                         ; rdi -> start of the string
+        pop rcx                         ; restore rcx value 
+
         ret 
 
 ;------------------------------------------------
