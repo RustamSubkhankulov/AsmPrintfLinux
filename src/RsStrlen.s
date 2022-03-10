@@ -1,5 +1,5 @@
-%ifndef Strlen
-%define Strlen 
+%ifndef rsStrlen
+%define rsStrlen 
 
 ;================================================
 
@@ -15,7 +15,7 @@ section .text
 ; Desrt:
 ;-------------------------------------------------
 
-Strlen
+RsStrlen
 
             ret 
 

@@ -1,5 +1,5 @@
-%ifndef Itoa
-%define Itoa 
+%ifndef rsItoa
+%define rsItoa 
 
 ;================================================
 
@@ -7,7 +7,7 @@ section .text
 
 ;==================FUNCTIONS=====================
 
-;--------------------Itoa------------------------
+;-------------------MyItoa-------------------------
 ;
 ; Descr: translates number to string of symbols
 ;
@@ -21,7 +21,7 @@ section .text
 ; Destr: RAX, RDX
 ;------------------------------------------------
 
-Itoa
+RsItoa
         mov rax, rbx                    ; get value for
                                         ; counting offset
         mov r8, 1                       ; at least ine symb in string
@@ -55,7 +55,7 @@ Itoa
         inc rdi                         ; di point to the start of string
         ret 
 
-;---------------------Itoa2n---------------------
+;--------------------RsItoa2n--------------------
 ;
 ; Descr: optimized version of the itoa64, made for
 ;        numeric sytems with base - power of two
@@ -71,7 +71,7 @@ Itoa
 ; Destr: RAX, RBX
 ;------------------------------------------------
 
-Itoa2n
+RsItoa2n
 
         push rcx                        ; save rcx value
         mov rcx, r9                     ; cl = n
@@ -94,13 +94,13 @@ Itoa2n
         mov rax, rbx                    ; get value 
         and rax, rdx                    ; use mask
 
-        mov bl, [rax + XlatTable64]     ; translate code
-        mov [rdi], bl                   ; store in sting
+        mov al, [rax + XlatTable64]     ; translate code
+        mov [rdi], al                   ; store in sting
         dec rdi                         ; iterate to next
 
         shr rbx, cl                   ; ax /= 2^base
 
-        cmp rax, 0                      
+        cmp rbx, 0                      
         jne .loop                       ; while (rax != 0)
 
         inc rdi                         ; rdi -> start of the string

@@ -19,12 +19,12 @@ section .text
 
 ;==================Includes======================
 
-%include    "print.s"                      
+%include    "RsPrint.s"                      
                                         ; printf function
-%include    "itoa.s"           
+%include    "RsItoa.s"           
                                         ; itoa function
 
-%include    "strlen.s"                     
+%include    "RsStrlen.s"                     
                                         ; strlen function
 
 ;%include unittest64.s                  
@@ -39,16 +39,17 @@ section .text
 
 global _start
 
-_start:     mov r9, 10d
-            mov rdi, MainBuf
-            mov rbx, 256d
+_start:     mov r9, 4d
+            mov rdx, 0Fh
+            lea rdi, [MainBuf]
+            mov rbx, 25B25C25Fh
 
-            call Itoa 
+            call RsItoa2n 
 
             mov rax, 01h                ; write
             mov rdi, 1                  ; stdout
-            mov rsi, MainBuf            ; char* buf
-            mov rdx ,rdi                ; rdx = number of symbols
+            lea rsi, [MainBuf]          ; char* buf
+            mov rdx, r8                 ; rdx = number of symbols
 
             syscall                     ; call write 
 
@@ -56,9 +57,9 @@ _start:     mov r9, 10d
 
 ;================================================
 
-section .bss
+section .data 
 
-MainBuf:    resb 64 
+MainBuf:    times 64 db (1)
 
 
 
