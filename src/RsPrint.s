@@ -1,3 +1,20 @@
+;====================PRINTF======================
+
+; 'Printf' assembler function made for 
+;                         Linux x86_64
+;
+; File consists unit tests for functions
+; Includes STRLIB library 
+
+; %s - '0'-terminated string
+; %c - symbol
+; %d - decimal
+; %x - hexidecimal
+; %o - octagonal
+; %b - binary
+
+;================================================
+
 %ifndef rsPrint
 %define rsPrint 
 

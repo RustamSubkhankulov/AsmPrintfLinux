@@ -39,19 +39,27 @@ section .text
 
 global _start
 
-_start:     mov r9, 4d
-            mov rdx, 0Fh
-            lea rdi, [MainBuf]
-            mov rbx, 25B25C25Fh
+_start:     
 
-            call RsItoa2n 
 
-            mov rax, 01h                ; write
-            mov rdi, 1                  ; stdout
-            lea rsi, [MainBuf]          ; char* buf
-            mov rdx, r8                 ; rdx = number of symbols
 
-            syscall                     ; call write 
+            ;lea rdi, [TestString]
+
+            ;call RsStrlen
+
+            ;mov r9, 4d
+            ;mov rdx, 0Fh
+            ;lea rdi, [MainBuf]
+            ;mov rbx, rcx 
+
+            ;call RsItoa2n 
+
+            ;mov rax, 01h                ; write
+            ;mov rdi, 1                  ; stdout
+            ;lea rsi, [MainBuf]          ; char* buf
+            ;mov rdx, r8                 ; rdx = number of symbols
+
+            ;ssyscall                     ; call write 
 
             .EXIT
 
@@ -59,7 +67,8 @@ _start:     mov r9, 4d
 
 section .data 
 
-MainBuf:    times 64 db (1)
+;TestString:          db "Hello World", 0
+;MainBuf:    times 64 db (1)
 
 
 

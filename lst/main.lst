@@ -20,67 +20,67 @@
     20                                  ;==================Includes======================
     21                                  
     22                                  %include    "RsPrint.s"                      
-     1                              <1> %ifndef rsPrint
-     2                              <1> %define rsPrint 
-     3                              <1> 
-     4                              <1> ;================================================
-     5                              <1> 
-     6                              <1> section .text 
-     7                              <1> 
-     8                              <1> ;==================FUNCTIONS=====================
-     9                              <1> 
-    10                              <1> ;-------------------RsPrint----------------------
-    11                              <1> ;
-    12                              <1> ; Descr:
-    13                              <1> ; Entry:
-    14                              <1> ; Exit:
-    15                              <1> ; Desrt:
-    16                              <1> ;-------------------------------------------------
+     1                              <1> ;====================PRINTF======================
+     2                              <1> 
+     3                              <1> ; 'Printf' assembler function made for 
+     4                              <1> ;                         Linux x86_64
+     5                              <1> ;
+     6                              <1> ; File consists unit tests for functions
+     7                              <1> ; Includes STRLIB library 
+     8                              <1> 
+     9                              <1> ; %s - '0'-terminated string
+    10                              <1> ; %c - symbol
+    11                              <1> ; %d - decimal
+    12                              <1> ; %x - hexidecimal
+    13                              <1> ; %o - octagonal
+    14                              <1> ; %b - binary
+    15                              <1> 
+    16                              <1> ;================================================
     17                              <1> 
-    18                              <1> RsPrint
-    18          ******************  <1>  warning: label alone on a line without a colon might be in error [-w+orphan-labels]
-    19                              <1> 
-    20 00000000 C3                  <1>             ret 
-    21                              <1> 
-    22                              <1> ;------------------RsPrintArg---------------------
-    23                              <1> ;
-    24                              <1> ; Descr:
-    25                              <1> ; Entry:
-    26                              <1> ; Exit:
-    27                              <1> ; Destr:
-    28                              <1> ;------------------------------------------------
-    29                              <1> 
-    30                              <1> RsPrintArg
-    30          ******************  <1>  warning: label alone on a line without a colon might be in error [-w+orphan-labels]
-    31                              <1> 
-    32 00000001 C3                  <1>             ret 
-    33                              <1> 
-    34                              <1> ;-------------------------------------------------
-    35                              <1> 
-    36                              <1> section .bss  
-    37                              <1> 
-    38 00000000 <res 00000040>      <1> PrintItoaBuf: resb 64                 ; buffer used for itoa
-    39                              <1> 
-    40                              <1> ;================================================
-    41                              <1> 
-    42                              <1> %endif
-    43                              <1> 
-    44                              <1> 
-    45                              <1> 
+    18                              <1> %ifndef rsPrint
+    19                              <1> %define rsPrint 
+    20                              <1> 
+    21                              <1> ;================================================
+    22                              <1> 
+    23                              <1> section .text 
+    24                              <1> 
+    25                              <1> ;==================FUNCTIONS=====================
+    26                              <1> 
+    27                              <1> ;-------------------RsPrint----------------------
+    28                              <1> ;
+    29                              <1> ; Descr:
+    30                              <1> ; Entry:
+    31                              <1> ; Exit:
+    32                              <1> ; Desrt:
+    33                              <1> ;-------------------------------------------------
+    34                              <1> 
+    35                              <1> RsPrint
+    35          ******************  <1>  warning: label alone on a line without a colon might be in error [-w+orphan-labels]
+    36                              <1> 
+    37 00000000 C3                  <1>             ret 
+    38                              <1> 
+    39                              <1> ;------------------RsPrintArg---------------------
+    40                              <1> ;
+    41                              <1> ; Descr:
+    42                              <1> ; Entry:
+    43                              <1> ; Exit:
+    44                              <1> ; Destr:
+    45                              <1> ;------------------------------------------------
     46                              <1> 
-    47                              <1> 
+    47                              <1> RsPrintArg
+    47          ******************  <1>  warning: label alone on a line without a colon might be in error [-w+orphan-labels]
     48                              <1> 
-    49                              <1> 
+    49 00000001 C3                  <1>             ret 
     50                              <1> 
-    51                              <1> 
+    51                              <1> ;-------------------------------------------------
     52                              <1> 
-    53                              <1> 
+    53                              <1> section .bss  
     54                              <1> 
-    55                              <1> 
+    55 00000000 <res 00000040>      <1> PrintItoaBuf: resb 64                 ; buffer used for itoa
     56                              <1> 
-    57                              <1> 
+    57                              <1> ;================================================
     58                              <1> 
-    59                              <1> 
+    59                              <1> %endif
     60                              <1> 
     61                              <1> 
     62                              <1> 
@@ -104,702 +104,719 @@
     80                              <1> 
     81                              <1> 
     82                              <1> 
-    83                              <1> ; section .text
+    83                              <1> 
     84                              <1> 
-    85                              <1> ; global _start                           ; making _start global name
+    85                              <1> 
     86                              <1> 
-    87                              <1> ; ;===================MAIN=BODY====================
+    87                              <1> 
     88                              <1> 
-    89                              <1> ; ; Unit tests for printf
+    89                              <1> 
     90                              <1> 
-    91                              <1> ; _start:     call CharUnitTest
-    92                              <1> ;             call StringUnitTest
-    93                              <1> ;             call DigitUnitTest
-    94                              <1> ;             call OctUnitTest
-    95                              <1> ;             call HexUnitTest
-    96                              <1> ;             call BinUnitTest
-    97                              <1> ;             call ComplUnitTest
+    91                              <1> 
+    92                              <1> 
+    93                              <1> 
+    94                              <1> 
+    95                              <1> 
+    96                              <1> 
+    97                              <1> 
     98                              <1> 
-    99                              <1> ;             mov rax, 0x3C      ; exit64 (rdi)
-   100                              <1> ;             xor rdi, rdi
-   101                              <1> ;             syscall
-   102                              <1> 
-   103                              <1> ; ;===================MACRO========================
-   104                              <1> 
-   105                              <1> ; %macro      .PAUSE 0            
-   106                              <1> ;                             ; getchar();
-   107                              <1> ; 		    nop
-   108                              <1> ; 		    xor rax, rax    ; read
-   109                              <1> 
-   110                              <1> ; 		    mov rdi, 0      ; stdin - first arg
-   111                              <1> ;             mov rsi, PauseBuf
-   112                              <1> ;                             ; char* buf - second arg
-   113                              <1> ;             mov rdx, 1      ; read one byte
-   114                              <1> 
-   115                              <1> ;             syscall         ; call read         
-   116                              <1>             
-   117                              <1> ; 		    nop
-   118                              <1> ; %endmacro
+    99                              <1> 
+   100                              <1> ; section .text
+   101                              <1> 
+   102                              <1> ; global _start                           ; making _start global name
+   103                              <1> 
+   104                              <1> ; ;===================MAIN=BODY====================
+   105                              <1> 
+   106                              <1> ; ; Unit tests for printf
+   107                              <1> 
+   108                              <1> ; _start:     call CharUnitTest
+   109                              <1> ;             call StringUnitTest
+   110                              <1> ;             call DigitUnitTest
+   111                              <1> ;             call OctUnitTest
+   112                              <1> ;             call HexUnitTest
+   113                              <1> ;             call BinUnitTest
+   114                              <1> ;             call ComplUnitTest
+   115                              <1> 
+   116                              <1> ;             mov rax, 0x3C      ; exit64 (rdi)
+   117                              <1> ;             xor rdi, rdi
+   118                              <1> ;             syscall
    119                              <1> 
-   120                              <1> ; ;------------------------------------------------
+   120                              <1> ; ;===================MACRO========================
    121                              <1> 
-   122                              <1> ; section .data 
-   123                              <1> 
-   124                              <1> ; PauseBuf:   db 1
-   125                              <1> 
-   126                              <1> ; ;==================INCLUDES======================
-   127                              <1> 
-   128                              <1> ; ;include W:\PRINTF\PRINTF.ASM
-   129                              <1> 
-   130                              <1> ; ;====================PRINTF======================
+   122                              <1> ; %macro      .PAUSE 0            
+   123                              <1> ;                             ; getchar();
+   124                              <1> ; 		    nop
+   125                              <1> ; 		    xor rax, rax    ; read
+   126                              <1> 
+   127                              <1> ; 		    mov rdi, 0      ; stdin - first arg
+   128                              <1> ;             mov rsi, PauseBuf
+   129                              <1> ;                             ; char* buf - second arg
+   130                              <1> ;             mov rdx, 1      ; read one byte
    131                              <1> 
-   132                              <1> ; ; 'Printf' assembler function made for DOSbox
-   133                              <1> ; ;
-   134                              <1> ; ; File consists unit tests for functions
-   135                              <1> ; ; Includes STRLIB library 
+   132                              <1> ;             syscall         ; call read         
+   133                              <1>             
+   134                              <1> ; 		    nop
+   135                              <1> ; %endmacro
    136                              <1> 
-   137                              <1> ; ; %s - '$'-terminated string
-   138                              <1> ; ; %c - symbol
-   139                              <1> ; ; %d - decimal
-   140                              <1> ; ; %x - hexidecimal
-   141                              <1> ; ; %o - octagonal
-   142                              <1> ; ; %b - binary
-   143                              <1> 
-   144                              <1> ; ;==================INCLUDES======================
-   145                              <1> 
-   146                              <1> ; ;include W:\PRINTF\STRLIB\STRLIB.ASM
-   147                              <1> 
-   148                              <1> ; ;================PRINTF=FUNC=====================
-   149                              <1> ; ;
-   150                              <1> ; ; Descr: Prints string in command line
-   151                              <1> ; ; Entry: DS == ES == segment, where string 
-   152                              <1> ; ;        is stored
-   153                              <1> ; ;        First arg - format string terminated 
-   154                              <1> ; ;                    with '$'
-   155                              <1> ; ;        Next args - arguments of format string
-   156                              <1> ; ; Exit:
-   157                              <1> ; ; Destr: SI, BX, DL, 
-   158                              <1> ; ;
-   159                              <1> ; ; Note: calling convention - cdecl
-   160                              <1> ; ;==================================================================================================
-   161                              <1> 
-   162                              <1> ; section .text
-   163                              <1> 
-   164                              <1> ; Printf  
-   165                              <1> ;         mov rax, 01h                    ; write 
-   166                              <1> ;         mov rdx, 01h                    ; 1 symbol
-   167                              <1> 
-   168                              <1> ;         push rbp                         ; prologue
-   169                              <1> ;         mov  rbp, rsp
-   170                              <1> 
-   171                              <1> ;         mov si, [bp + 4]                ; getting address
-   172                              <1> ;                                         ; of the string
-   173                              <1> ;         lea bx, [bp + 6]                ; bx -> first arg after
-   174                              <1> ;                                         ; format string            
-   175                              <1> 
-   176                              <1> ;     PrintfLoop:
-   177                              <1> ;         mov dl, [si]                    ; Dl - to be printed
-   178                              <1> ;         mov [Symbbuf], dl               ; save to local var
-   179                              <1> ;         inc si                          ; move to next symb
+   137                              <1> ; ;------------------------------------------------
+   138                              <1> 
+   139                              <1> ; section .data 
+   140                              <1> 
+   141                              <1> ; PauseBuf:   db 1
+   142                              <1> 
+   143                              <1> ; ;==================INCLUDES======================
+   144                              <1> 
+   145                              <1> ; ;include W:\PRINTF\PRINTF.ASM
+   146                              <1> 
+   147                              <1> ; ;====================PRINTF======================
+   148                              <1> 
+   149                              <1> ; ; 'Printf' assembler function made for DOSbox
+   150                              <1> ; ;
+   151                              <1> ; ; File consists unit tests for functions
+   152                              <1> ; ; Includes STRLIB library 
+   153                              <1> 
+   154                              <1> ; ; %s - '$'-terminated string
+   155                              <1> ; ; %c - symbol
+   156                              <1> ; ; %d - decimal
+   157                              <1> ; ; %x - hexidecimal
+   158                              <1> ; ; %o - octagonal
+   159                              <1> ; ; %b - binary
+   160                              <1> 
+   161                              <1> ; ;==================INCLUDES======================
+   162                              <1> 
+   163                              <1> ; ;include W:\PRINTF\STRLIB\STRLIB.ASM
+   164                              <1> 
+   165                              <1> ; ;================PRINTF=FUNC=====================
+   166                              <1> ; ;
+   167                              <1> ; ; Descr: Prints string in command line
+   168                              <1> ; ; Entry: DS == ES == segment, where string 
+   169                              <1> ; ;        is stored
+   170                              <1> ; ;        First arg - format string terminated 
+   171                              <1> ; ;                    with '$'
+   172                              <1> ; ;        Next args - arguments of format string
+   173                              <1> ; ; Exit:
+   174                              <1> ; ; Destr: SI, BX, DL, 
+   175                              <1> ; ;
+   176                              <1> ; ; Note: calling convention - cdecl
+   177                              <1> ; ;==================================================================================================
+   178                              <1> 
+   179                              <1> ; section .text
    180                              <1> 
-   181                              <1> ;         cmp dl, '%'                     ; if there argument
-   182                              <1> ;         jne PrintSymb
-   183                              <1> 
-   184                              <1> ;         call PrintArg                   ; print arg according to specifier
-   185                              <1> ;         jmp  Print$Check
-   186                              <1> 
-   187                              <1> ;     PrintSymb:
-   188                              <1> ;         push rsi
-   189                              <1> ;         push rdi 
-   190                              <1> 
-   191                              <1> ;         mov rsi, Symbbuf                ; rsi -> SymbBuf
-   192                              <1> ;         mov rdi, 1                      ; stdout 
-   193                              <1> ;         syscall
-   194                              <1> 
-   195                              <1> ;         pop rdi 
-   196                              <1> ;         pop rsi
+   181                              <1> ; Printf  
+   182                              <1> ;         mov rax, 01h                    ; write 
+   183                              <1> ;         mov rdx, 01h                    ; 1 symbol
+   184                              <1> 
+   185                              <1> ;         push rbp                         ; prologue
+   186                              <1> ;         mov  rbp, rsp
+   187                              <1> 
+   188                              <1> ;         mov si, [bp + 4]                ; getting address
+   189                              <1> ;                                         ; of the string
+   190                              <1> ;         lea bx, [bp + 6]                ; bx -> first arg after
+   191                              <1> ;                                         ; format string            
+   192                              <1> 
+   193                              <1> ;     PrintfLoop:
+   194                              <1> ;         mov dl, [si]                    ; Dl - to be printed
+   195                              <1> ;         mov [Symbbuf], dl               ; save to local var
+   196                              <1> ;         inc si                          ; move to next symb
    197                              <1> 
-   198                              <1> ;     Print$Check:
-   199                              <1> ;         cmp byte ptr [si], '$'
-   200                              <1> ;         jne PrintfLoop                  ; repeat while si != 
-   201                              <1> ;                                         ; terminating symbol
-   202                              <1> ;         pop rbp                          ; epilogue
-   203                              <1> ;         ret 
-   204                              <1> 
-   205                              <1> ; section .data 
-   206                              <1> 
-   207                              <1> ; Symbbuf:    db 0                        ; buffer for symbol to be printed
-   208                              <1> 
-   209                              <1> ; ;-------------------PrintArg---------------------
-   210                              <1> ; ;
-   211                              <1> ; ; Descr: Function, used in printf to write 
-   212                              <1> ; ;        correctly interpritated argument
-   213                              <1> ; ; Entry: SI -> next symb after %
-   214                              <1> ; ;        BX -> current argument in stack
-   215                              <1> ; ; Exit:  None
-   216                              <1> ; ; Destr: DX, DI, CL?, SI++, BX += 2; 
-   217                              <1> ; ;------------------------------------------------
-   218                              <1> 
-   219                              <1> ; PrintArg   
-   220                              <1> ;             ;c   s   d   x   o   b 
-   221                              <1> ;             ;63h 73h 64h 78h 6Fh 62h
-   222                              <1> ;             ; a = 61h
+   198                              <1> ;         cmp dl, '%'                     ; if there argument
+   199                              <1> ;         jne PrintSymb
+   200                              <1> 
+   201                              <1> ;         call PrintArg                   ; print arg according to specifier
+   202                              <1> ;         jmp  Print$Check
+   203                              <1> 
+   204                              <1> ;     PrintSymb:
+   205                              <1> ;         push rsi
+   206                              <1> ;         push rdi 
+   207                              <1> 
+   208                              <1> ;         mov rsi, Symbbuf                ; rsi -> SymbBuf
+   209                              <1> ;         mov rdi, 1                      ; stdout 
+   210                              <1> ;         syscall
+   211                              <1> 
+   212                              <1> ;         pop rdi 
+   213                              <1> ;         pop rsi
+   214                              <1> 
+   215                              <1> ;     Print$Check:
+   216                              <1> ;         cmp byte ptr [si], '$'
+   217                              <1> ;         jne PrintfLoop                  ; repeat while si != 
+   218                              <1> ;                                         ; terminating symbol
+   219                              <1> ;         pop rbp                          ; epilogue
+   220                              <1> ;         ret 
+   221                              <1> 
+   222                              <1> ; section .data 
    223                              <1> 
-   224                              <1> ;             ;offset
-   225                              <1> ;             ; b  c  d  o   s   x  
-   226                              <1> ;             ; 1d 2d 3d 14d 18d 23d
-   227                              <1> 
-   228                              <1> ;             mov dl, [si]                ; load next symb
-   229                              <1> 
-   230                              <1> ;             cmp dl, '%'
-   231                              <1> ;             je DisplayCurSymb           ; %% specifier
-   232                              <1> 
-   233                              <1> ;             sub dl, 'a' + 1             ; code -> offset from 'a'
-   234                              <1> 
-   235                              <1> ;                                         ; jmp to default
-   236                              <1> ;                                         ; if
-   237                              <1> ;             cmp dl, 22                  ; value is out
-   238                              <1> ;             ja PrintDefault             ; of range
-   239                              <1> 
-   240                              <1> ;             xor dh, dh
-   241                              <1> ;             mov di, dx                  ; di == dl
-   242                              <1> ;             shl di, 1                   ; di *= 2
-   243                              <1> 
-   244                              <1> ;             lea di, JumpTable[di]
-   245                              <1> ;             jmp [di]                    ; jump to particlar 
-   246                              <1> ;                                         ; option from table
-   247                              <1> 
-   248                              <1> ;             align 2                     ; alignment
+   224                              <1> ; Symbbuf:    db 0                        ; buffer for symbol to be printed
+   225                              <1> 
+   226                              <1> ; ;-------------------PrintArg---------------------
+   227                              <1> ; ;
+   228                              <1> ; ; Descr: Function, used in printf to write 
+   229                              <1> ; ;        correctly interpritated argument
+   230                              <1> ; ; Entry: SI -> next symb after %
+   231                              <1> ; ;        BX -> current argument in stack
+   232                              <1> ; ; Exit:  None
+   233                              <1> ; ; Destr: DX, DI, CL?, SI++, BX += 2; 
+   234                              <1> ; ;------------------------------------------------
+   235                              <1> 
+   236                              <1> ; PrintArg   
+   237                              <1> ;             ;c   s   d   x   o   b 
+   238                              <1> ;             ;63h 73h 64h 78h 6Fh 62h
+   239                              <1> ;             ; a = 61h
+   240                              <1> 
+   241                              <1> ;             ;offset
+   242                              <1> ;             ; b  c  d  o   s   x  
+   243                              <1> ;             ; 1d 2d 3d 14d 18d 23d
+   244                              <1> 
+   245                              <1> ;             mov dl, [si]                ; load next symb
+   246                              <1> 
+   247                              <1> ;             cmp dl, '%'
+   248                              <1> ;             je DisplayCurSymb           ; %% specifier
    249                              <1> 
-   250                              <1> ;         JumpTable:
-   251                              <1> ;             dw PrintBin                 ;1
-   252                              <1> ;             dw PrintChar                ;2
-   253                              <1> ;             dw PrintDec                 ;3
-   254                              <1> ;             dw PrintDefault             ;4
-   255                              <1> ;             dw PrintDefault             ;5
-   256                              <1> ;             dw PrintDefault             ;6
-   257                              <1> ;             dw PrintDefault             ;7
-   258                              <1> ;             dw PrintDefault             ;8
-   259                              <1> ;             dw PrintDefault             ;9
-   260                              <1> ;             dw PrintDefault             ;10
-   261                              <1> ;             dw PrintDefault             ;11
-   262                              <1> ;             dw PrintDefault             ;12
-   263                              <1> ;             dw PrintDefault             ;13
-   264                              <1> ;             dw PrintOct                 ;14
-   265                              <1> ;             dw PrintDefault             ;15
-   266                              <1> ;             dw PrintDefault             ;16
-   267                              <1> ;             dw PrintDefault             ;17
-   268                              <1> ;             dw PrintStr                 ;18
-   269                              <1> ;             dw PrintDefault             ;19
-   270                              <1> ;             dw PrintDefault             ;20
-   271                              <1> ;             dw PrintDefault             ;21
-   272                              <1> ;             dw PrintDefault             ;22
-   273                              <1> ;             dw PrintHex                 ;23
-   274                              <1> 
-   275                              <1> ;         PrintBin:
-   276                              <1> ;             mov cl, 1
-   277                              <1> ;             jmp Print2n
-   278                              <1> 
-   279                              <1> ;         PrintOct:
-   280                              <1> ;             mov cl, 3
-   281                              <1> ;             jmp Print2n
-   282                              <1> 
-   283                              <1> ;         PrintHex:
-   284                              <1> ;             mov cl, 4
-   285                              <1> 
-   286                              <1> ;         Print2n:
-   287                              <1> ;             call Print2nArg
-   288                              <1> ;             jmp PrintRet
-   289                              <1> 
-   290                              <1> ;         PrintChar:
-   291                              <1> ;             call PrintCharArg
-   292                              <1> ;             jmp PrintRet
-   293                              <1> 
-   294                              <1> ;         PrintDec:
-   295                              <1> ;             call PrintDecArg
-   296                              <1> ;             jmp PrintRet
-   297                              <1> 
-   298                              <1> ;         PrintStr:
-   299                              <1> ;             call PrintStrArg
-   300                              <1> ;             jmp PrintRet
-   301                              <1> 
-   302                              <1> ;         PrintDefault:
-   303                              <1> ;             mov [SymbBuf], '%'
-   304                              <1> 
-   305                              <1> ;             push rdi 
-   306                              <1> ;             push rsi 
-   307                              <1> ;             push rdx 
-   308                              <1> 
-   309                              <1> ;             mov rdi, 1                  ; to stdout
-   310                              <1> ;             mov rsi, SymbBuf            ; from src 
-   311                              <1> ;             mov rdx, 1                  ; print 1 symbol
-   312                              <1> 
-   313                              <1> ;             syscall                     ; write
+   250                              <1> ;             sub dl, 'a' + 1             ; code -> offset from 'a'
+   251                              <1> 
+   252                              <1> ;                                         ; jmp to default
+   253                              <1> ;                                         ; if
+   254                              <1> ;             cmp dl, 22                  ; value is out
+   255                              <1> ;             ja PrintDefault             ; of range
+   256                              <1> 
+   257                              <1> ;             xor dh, dh
+   258                              <1> ;             mov di, dx                  ; di == dl
+   259                              <1> ;             shl di, 1                   ; di *= 2
+   260                              <1> 
+   261                              <1> ;             lea di, JumpTable[di]
+   262                              <1> ;             jmp [di]                    ; jump to particlar 
+   263                              <1> ;                                         ; option from table
+   264                              <1> 
+   265                              <1> ;             align 2                     ; alignment
+   266                              <1> 
+   267                              <1> ;         JumpTable:
+   268                              <1> ;             dw PrintBin                 ;1
+   269                              <1> ;             dw PrintChar                ;2
+   270                              <1> ;             dw PrintDec                 ;3
+   271                              <1> ;             dw PrintDefault             ;4
+   272                              <1> ;             dw PrintDefault             ;5
+   273                              <1> ;             dw PrintDefault             ;6
+   274                              <1> ;             dw PrintDefault             ;7
+   275                              <1> ;             dw PrintDefault             ;8
+   276                              <1> ;             dw PrintDefault             ;9
+   277                              <1> ;             dw PrintDefault             ;10
+   278                              <1> ;             dw PrintDefault             ;11
+   279                              <1> ;             dw PrintDefault             ;12
+   280                              <1> ;             dw PrintDefault             ;13
+   281                              <1> ;             dw PrintOct                 ;14
+   282                              <1> ;             dw PrintDefault             ;15
+   283                              <1> ;             dw PrintDefault             ;16
+   284                              <1> ;             dw PrintDefault             ;17
+   285                              <1> ;             dw PrintStr                 ;18
+   286                              <1> ;             dw PrintDefault             ;19
+   287                              <1> ;             dw PrintDefault             ;20
+   288                              <1> ;             dw PrintDefault             ;21
+   289                              <1> ;             dw PrintDefault             ;22
+   290                              <1> ;             dw PrintHex                 ;23
+   291                              <1> 
+   292                              <1> ;         PrintBin:
+   293                              <1> ;             mov cl, 1
+   294                              <1> ;             jmp Print2n
+   295                              <1> 
+   296                              <1> ;         PrintOct:
+   297                              <1> ;             mov cl, 3
+   298                              <1> ;             jmp Print2n
+   299                              <1> 
+   300                              <1> ;         PrintHex:
+   301                              <1> ;             mov cl, 4
+   302                              <1> 
+   303                              <1> ;         Print2n:
+   304                              <1> ;             call Print2nArg
+   305                              <1> ;             jmp PrintRet
+   306                              <1> 
+   307                              <1> ;         PrintChar:
+   308                              <1> ;             call PrintCharArg
+   309                              <1> ;             jmp PrintRet
+   310                              <1> 
+   311                              <1> ;         PrintDec:
+   312                              <1> ;             call PrintDecArg
+   313                              <1> ;             jmp PrintRet
    314                              <1> 
-   315                              <1> ;             pop rdx
-   316                              <1> ;             pop rsi
-   317                              <1> ;             pop rdi 
+   315                              <1> ;         PrintStr:
+   316                              <1> ;             call PrintStrArg
+   317                              <1> ;             jmp PrintRet
    318                              <1> 
-   319                              <1> ;             mov dl, [si]                ; get current symbol 
-   320                              <1> 
-   321                              <1> ;         DisplayCurSymb:
-   322                              <1> ;             mov [SymbBuf], dl
-   323                              <1> ;             int 21h                     ; display char from dl
-   324                              <1> 
-   325                              <1> ;         PrintRet:
-   326                              <1> ;             inc si                      ; iterate to next symb
-   327                              <1> ;             ret
-   328                              <1> 
-   329                              <1> ; ;-----------------PrintCharArg-------------------
-   330                              <1> ; ;
-   331                              <1> ; ; Descr: Displays char argument from stack
-   332                              <1> ; ; Entry: BX - current argument
-   333                              <1> ; ;        AH = 02h
-   334                              <1> ; ; Exit: None
-   335                              <1> ; ; Destr: BX->next arg in stack(+2)
-   336                              <1> ; ;------------------------------------------------
+   319                              <1> ;         PrintDefault:
+   320                              <1> ;             mov [SymbBuf], '%'
+   321                              <1> 
+   322                              <1> ;             push rdi 
+   323                              <1> ;             push rsi 
+   324                              <1> ;             push rdx 
+   325                              <1> 
+   326                              <1> ;             mov rdi, 1                  ; to stdout
+   327                              <1> ;             mov rsi, SymbBuf            ; from src 
+   328                              <1> ;             mov rdx, 1                  ; print 1 symbol
+   329                              <1> 
+   330                              <1> ;             syscall                     ; write
+   331                              <1> 
+   332                              <1> ;             pop rdx
+   333                              <1> ;             pop rsi
+   334                              <1> ;             pop rdi 
+   335                              <1> 
+   336                              <1> ;             mov dl, [si]                ; get current symbol 
    337                              <1> 
-   338                              <1> ; PrintCharArg    
-   339                              <1> ;                 push rdx                ; save rdx
-   340                              <1> ;                 push rsi 
-   341                              <1> ;                 push rdi 
-   342                              <1> 
-   343                              <1> ;                 mov dx, [bx]            ; get char
-   344                              <1> ;                 add bx, 2               ; iterate to next arg
+   338                              <1> ;         DisplayCurSymb:
+   339                              <1> ;             mov [SymbBuf], dl
+   340                              <1> ;             int 21h                     ; display char from dl
+   341                              <1> 
+   342                              <1> ;         PrintRet:
+   343                              <1> ;             inc si                      ; iterate to next symb
+   344                              <1> ;             ret
    345                              <1> 
-   346                              <1> ;                 mov rsi, SymbBuf
-   347                              <1> ;                 mov rdx, 1
-   348                              <1> ;                 mov rdi, 1
-   349                              <1> 
-   350                              <1> ;                 pop rdi 
-   351                              <1> ;                 pop rsi 
-   352                              <1> ;                 pop rdx 
-   353                              <1> 
-   354                              <1> ;                 ret 
-   355                              <1> 
-   356                              <1> ; ;-----------------PrintStrArg--------------------
-   357                              <1> ; ;
-   358                              <1> ; ; Descr: Displays in cmnd line string argument
-   359                              <1> ; ;        Takes argument from stack
-   360                              <1> ; ; Entry: BX -> current argument
-   361                              <1> ; ; Exit:
-   362                              <1> ; ; Destr: DI, BX -> next arg in stack(+2)
-   363                              <1> ; ;------------------------------------------------
-   364                              <1> 
-   365                              <1> ; PrintStrArg    
-   366                              <1> ;                 push rax                 ; save ax value
-   367                              <1> ;                 push rdx 
-   368                              <1> 
-   369                              <1> ;                 mov dx, [bx]           ; get arg from stack
-   370                              <1> ;                 add bx, 2               ; iterate to next arg
-   371                              <1> 
-   372                              <1> ;                 mov ah, 09h
-   373                              <1> ;                 int 21h                 ; display string
-   374                              <1> 
-   375                              <1> ;                 pop rdx 
-   376                              <1> ;                 pop rax                  ; restore ax value
-   377                              <1> ;                 ret 
-   378                              <1> 
-   379                              <1> ; ;-----------------PrintDecArg--------------------
-   380                              <1> ; ;
-   381                              <1> ; ; Descr:
-   382                              <1> ; ; Entry:
-   383                              <1> ; ; Exit:
-   384                              <1> ; ; DEstr: BX->next arg in stack(+2), CX, DI, DX
-   385                              <1> ; ;------------------------------------------------
-   386                              <1> 
-   387                              <1> ; PrintDecArg    
-   388                              <1> ;                 push rbx                ; save bx value
-   389                              <1> ;                 push rsi                ; save si value
-   390                              <1> 
-   391                              <1> ;                 mov bx, [bx]            ; get arg
-   392                              <1> ;                 mov cx, 10              ; base of the numeric system
-   393                              <1> ;                 mov di, ItoaBuf         ; where string will be stored
-   394                              <1> 
-   395                              <1> ;                 push rax                ; save ax value
-   396                              <1> ;                 call rnumtoa            ; translate number to string
-   397                              <1> ;                 pop rax                 ; restore ax value
-   398                              <1> 
-   399                              <1> ;                 mov cx, si              ; cx = number of symbols in string
-   400                              <1> ;                 call DisplayStr         ; Display string  
-   401                              <1> 
-   402                              <1> ;                 pop rsi                 ; restore si value
-   403                              <1> ;                 pop rbx 
-   404                              <1> ;                 add bx, 2               ; restore bx value
-   405                              <1> ;                                         ; and iterate to next arg
-   406                              <1> ;                 ret
+   346                              <1> ; ;-----------------PrintCharArg-------------------
+   347                              <1> ; ;
+   348                              <1> ; ; Descr: Displays char argument from stack
+   349                              <1> ; ; Entry: BX - current argument
+   350                              <1> ; ;        AH = 02h
+   351                              <1> ; ; Exit: None
+   352                              <1> ; ; Destr: BX->next arg in stack(+2)
+   353                              <1> ; ;------------------------------------------------
+   354                              <1> 
+   355                              <1> ; PrintCharArg    
+   356                              <1> ;                 push rdx                ; save rdx
+   357                              <1> ;                 push rsi 
+   358                              <1> ;                 push rdi 
+   359                              <1> 
+   360                              <1> ;                 mov dx, [bx]            ; get char
+   361                              <1> ;                 add bx, 2               ; iterate to next arg
+   362                              <1> 
+   363                              <1> ;                 mov rsi, SymbBuf
+   364                              <1> ;                 mov rdx, 1
+   365                              <1> ;                 mov rdi, 1
+   366                              <1> 
+   367                              <1> ;                 pop rdi 
+   368                              <1> ;                 pop rsi 
+   369                              <1> ;                 pop rdx 
+   370                              <1> 
+   371                              <1> ;                 ret 
+   372                              <1> 
+   373                              <1> ; ;-----------------PrintStrArg--------------------
+   374                              <1> ; ;
+   375                              <1> ; ; Descr: Displays in cmnd line string argument
+   376                              <1> ; ;        Takes argument from stack
+   377                              <1> ; ; Entry: BX -> current argument
+   378                              <1> ; ; Exit:
+   379                              <1> ; ; Destr: DI, BX -> next arg in stack(+2)
+   380                              <1> ; ;------------------------------------------------
+   381                              <1> 
+   382                              <1> ; PrintStrArg    
+   383                              <1> ;                 push rax                 ; save ax value
+   384                              <1> ;                 push rdx 
+   385                              <1> 
+   386                              <1> ;                 mov dx, [bx]           ; get arg from stack
+   387                              <1> ;                 add bx, 2               ; iterate to next arg
+   388                              <1> 
+   389                              <1> ;                 mov ah, 09h
+   390                              <1> ;                 int 21h                 ; display string
+   391                              <1> 
+   392                              <1> ;                 pop rdx 
+   393                              <1> ;                 pop rax                  ; restore ax value
+   394                              <1> ;                 ret 
+   395                              <1> 
+   396                              <1> ; ;-----------------PrintDecArg--------------------
+   397                              <1> ; ;
+   398                              <1> ; ; Descr:
+   399                              <1> ; ; Entry:
+   400                              <1> ; ; Exit:
+   401                              <1> ; ; DEstr: BX->next arg in stack(+2), CX, DI, DX
+   402                              <1> ; ;------------------------------------------------
+   403                              <1> 
+   404                              <1> ; PrintDecArg    
+   405                              <1> ;                 push rbx                ; save bx value
+   406                              <1> ;                 push rsi                ; save si value
    407                              <1> 
-   408                              <1> ; ;-----------------Print2nArg--------------------
-   409                              <1> ; ;
-   410                              <1> ; ; Descr: Prints arguments in numerci system 
-   411                              <1> ; ;        with base = 2^n
-   412                              <1> ; ; Entry: CL = n; 
-   413                              <1> ; ; Exit:  None
-   414                              <1> ; ; Destr: BX -> next arg in stack(+2); DI, AX
-   415                              <1> ; ;------------------------------------------------
-   416                              <1> 
-   417                              <1> ; Print2nArg      
-   418                              <1> ;                 xor ch, ch
-   419                              <1> ;                 push rax                 ; save ax value
-   420                              <1> 
-   421                              <1> ;                 mov dx, 1               ;
-   422                              <1> ;                 shl dx, cl              ; dx = 2^n
-   423                              <1> ;                 dec dx                  ; dx == mask == 2^n - 1
+   408                              <1> ;                 mov bx, [bx]            ; get arg
+   409                              <1> ;                 mov cx, 10              ; base of the numeric system
+   410                              <1> ;                 mov di, ItoaBuf         ; where string will be stored
+   411                              <1> 
+   412                              <1> ;                 push rax                ; save ax value
+   413                              <1> ;                 call rnumtoa            ; translate number to string
+   414                              <1> ;                 pop rax                 ; restore ax value
+   415                              <1> 
+   416                              <1> ;                 mov cx, si              ; cx = number of symbols in string
+   417                              <1> ;                 call DisplayStr         ; Display string  
+   418                              <1> 
+   419                              <1> ;                 pop rsi                 ; restore si value
+   420                              <1> ;                 pop rbx 
+   421                              <1> ;                 add bx, 2               ; restore bx value
+   422                              <1> ;                                         ; and iterate to next arg
+   423                              <1> ;                 ret
    424                              <1> 
-   425                              <1> ;                 mov ax, [bx]            ; get argument from stack
-   426                              <1> ;                 add bx, 2               ; iterate to next argument
-   427                              <1> 
-   428                              <1> ;                 mov di, ItoaBuf         ; where string will be stored
-   429                              <1> 
-   430                              <1> ;                 push rsi                 ; save si value
-   431                              <1> ;                 call rnumtoa2           
-   432                              <1> 
-   433                              <1> ;                 mov cx, si              ; cx = number of symbols in string
-   434                              <1> ;                 pop rsi                  ; restore si value
-   435                              <1> 
-   436                              <1> ;                 call DisplayStr         ; display string in cmnd line
-   437                              <1> ;                 pop rax                  ; restore ax value
-   438                              <1> 
-   439                              <1> ;                 ret 
-   440                              <1> 
-   441                              <1> ; ;--------------------DisplayStr------------------
-   442                              <1> ; ;
-   443                              <1> ; ; Descr: prints string in command line
-   444                              <1> ; ; Entry: DI - start of the string
-   445                              <1> ; ;        CX - lenght of the string
-   446                              <1> ; ; Exit:  None
-   447                              <1> ; ; Destr: DX, DI
-   448                              <1> ; ;------------------------------------------------
+   425                              <1> ; ;-----------------Print2nArg--------------------
+   426                              <1> ; ;
+   427                              <1> ; ; Descr: Prints arguments in numerci system 
+   428                              <1> ; ;        with base = 2^n
+   429                              <1> ; ; Entry: CL = n; 
+   430                              <1> ; ; Exit:  None
+   431                              <1> ; ; Destr: BX -> next arg in stack(+2); DI, AX
+   432                              <1> ; ;------------------------------------------------
+   433                              <1> 
+   434                              <1> ; Print2nArg      
+   435                              <1> ;                 xor ch, ch
+   436                              <1> ;                 push rax                 ; save ax value
+   437                              <1> 
+   438                              <1> ;                 mov dx, 1               ;
+   439                              <1> ;                 shl dx, cl              ; dx = 2^n
+   440                              <1> ;                 dec dx                  ; dx == mask == 2^n - 1
+   441                              <1> 
+   442                              <1> ;                 mov ax, [bx]            ; get argument from stack
+   443                              <1> ;                 add bx, 2               ; iterate to next argument
+   444                              <1> 
+   445                              <1> ;                 mov di, ItoaBuf         ; where string will be stored
+   446                              <1> 
+   447                              <1> ;                 push rsi                 ; save si value
+   448                              <1> ;                 call rnumtoa2           
    449                              <1> 
-   450                              <1> ; DisplayStr      
-   451                              <1> ;                 mov dx, di              ; dx -> start of string
-   452                              <1> ;                 add di, cx              ; di -> end of the string
-   453                              <1> 
-   454                              <1> ;                 mov byte ptr [di], '$'  ; add terminatin '$'
+   450                              <1> ;                 mov cx, si              ; cx = number of symbols in string
+   451                              <1> ;                 pop rsi                  ; restore si value
+   452                              <1> 
+   453                              <1> ;                 call DisplayStr         ; display string in cmnd line
+   454                              <1> ;                 pop rax                  ; restore ax value
    455                              <1> 
-   456                              <1> ;                 push rax 
+   456                              <1> ;                 ret 
    457                              <1> 
-   458                              <1> ;                 mov ah, 09h     
-   459                              <1> ;                 int 21h                 ; 'display text'
-   460                              <1> 
-   461                              <1> ;                 pop rax                  ; save and restore ax value
-   462                              <1> 
-   463                              <1> ;                 ret   
-   464                              <1> 
+   458                              <1> ; ;--------------------DisplayStr------------------
+   459                              <1> ; ;
+   460                              <1> ; ; Descr: prints string in command line
+   461                              <1> ; ; Entry: DI - start of the string
+   462                              <1> ; ;        CX - lenght of the string
+   463                              <1> ; ; Exit:  None
+   464                              <1> ; ; Destr: DX, DI
    465                              <1> ; ;------------------------------------------------
-   466                              <1> ; section .data 
-   467                              <1> 
-   468                              <1> ; ItoaBuf     times 16 + 1 db (1)
-   469                              <1> 
-   470                              <1> ; ;==============UNIT=TEST=FUNCTIONS=================================================================
-   471                              <1> 
-   472                              <1> ; ;----------------CharUnitTest--------------------
-   473                              <1> ; ;
-   474                              <1> ; ; Descr: Test '%c' in printf
-   475                              <1> ; ;
-   476                              <1> ; ; Entry: None
-   477                              <1> ; ; Exit:  None
-   478                              <1> ; ; Destr: same as printf
-   479                              <1> ; ;------------------------------------------------
-   480                              <1> 
-   481                              <1> ; section .text 
-   482                              <1> 
-   483                              <1> ; CharUnitTest    
-   484                              <1> ;                 mov ax, 'J'
-   485                              <1> ;                 push rax
-   486                              <1> ;                 mov ax, TestChar
-   487                              <1> ;                 push rax
-   488                              <1>             
-   489                              <1> ;                 call Printf
-   490                              <1> ;                 .PAUSE
-   491                              <1> 
-   492                              <1> ;                 add sp, 16
-   493                              <1> 
-   494                              <1> ;                 ret
-   495                              <1> 
-   496                              <1> ; section .data
+   466                              <1> 
+   467                              <1> ; DisplayStr      
+   468                              <1> ;                 mov dx, di              ; dx -> start of string
+   469                              <1> ;                 add di, cx              ; di -> end of the string
+   470                              <1> 
+   471                              <1> ;                 mov byte ptr [di], '$'  ; add terminatin '$'
+   472                              <1> 
+   473                              <1> ;                 push rax 
+   474                              <1> 
+   475                              <1> ;                 mov ah, 09h     
+   476                              <1> ;                 int 21h                 ; 'display text'
+   477                              <1> 
+   478                              <1> ;                 pop rax                  ; save and restore ax value
+   479                              <1> 
+   480                              <1> ;                 ret   
+   481                              <1> 
+   482                              <1> ; ;------------------------------------------------
+   483                              <1> ; section .data 
+   484                              <1> 
+   485                              <1> ; ItoaBuf     times 16 + 1 db (1)
+   486                              <1> 
+   487                              <1> ; ;==============UNIT=TEST=FUNCTIONS=================================================================
+   488                              <1> 
+   489                              <1> ; ;----------------CharUnitTest--------------------
+   490                              <1> ; ;
+   491                              <1> ; ; Descr: Test '%c' in printf
+   492                              <1> ; ;
+   493                              <1> ; ; Entry: None
+   494                              <1> ; ; Exit:  None
+   495                              <1> ; ; Destr: same as printf
+   496                              <1> ; ;------------------------------------------------
    497                              <1> 
-   498                              <1> ; TestChar        db "(Test %%c) This char - %c - printed by printf", 0Ah, 24h
+   498                              <1> ; section .text 
    499                              <1> 
-   500                              <1> ; ;----------------StringUnitTest-------------------
-   501                              <1> ; ;
-   502                              <1> ; ; Descr: Test '%s' in printf
-   503                              <1> ; ;
-   504                              <1> ; ; Entry: None
-   505                              <1> ; ; Exit:  None
-   506                              <1> ; ; Destr: same as printf
-   507                              <1> ; ;------------------------------------------------
+   500                              <1> ; CharUnitTest    
+   501                              <1> ;                 mov ax, 'J'
+   502                              <1> ;                 push rax
+   503                              <1> ;                 mov ax, TestChar
+   504                              <1> ;                 push rax
+   505                              <1>             
+   506                              <1> ;                 call Printf
+   507                              <1> ;                 .PAUSE
    508                              <1> 
-   509                              <1> ; StringUnitTest  
-   510                              <1> ;                 mov ax, Voiceline
-   511                              <1> ;                 push rax
-   512                              <1> ;                 mov ax, TestString
-   513                              <1> ;                 push rax
+   509                              <1> ;                 add sp, 16
+   510                              <1> 
+   511                              <1> ;                 ret
+   512                              <1> 
+   513                              <1> ; section .data
    514                              <1> 
-   515                              <1> ;                 call printf
-   516                              <1> ;                 .PAUSE
-   517                              <1> 
-   518                              <1> ;                 add sp, 16
-   519                              <1> 
-   520                              <1> ;                 ret
-   521                              <1> 
-   522                              <1> ; section .data 
-   523                              <1> 
-   524                              <1> ; TestString      db "(Test %%s) Saymon says: %s", 0Ah, 24h
-   525                              <1> ; Voiceline       db "Hello world!$"
-   526                              <1> 
-   527                              <1> ; ;----------------DigitUnitTest-------------------
-   528                              <1> ; ;
-   529                              <1> ; ; Descr: Test '%d' in printf
-   530                              <1> ; ;
-   531                              <1> ; ; Entry: None
-   532                              <1> ; ; Exit:  None
-   533                              <1> ; ; Destr: same as printf
-   534                              <1> ; ;------------------------------------------------
-   535                              <1> 
-   536                              <1> ; section .text 
-   537                              <1> 
-   538                              <1> ; DigitUnitTest   
-   539                              <1> ;                 mov ax, 6
-   540                              <1> ;                 push rax 
-   541                              <1> ;                 mov ax, TestDigit
-   542                              <1> ;                 push rax
+   515                              <1> ; TestChar        db "(Test %%c) This char - %c - printed by printf", 0Ah, 24h
+   516                              <1> 
+   517                              <1> ; ;----------------StringUnitTest-------------------
+   518                              <1> ; ;
+   519                              <1> ; ; Descr: Test '%s' in printf
+   520                              <1> ; ;
+   521                              <1> ; ; Entry: None
+   522                              <1> ; ; Exit:  None
+   523                              <1> ; ; Destr: same as printf
+   524                              <1> ; ;------------------------------------------------
+   525                              <1> 
+   526                              <1> ; StringUnitTest  
+   527                              <1> ;                 mov ax, Voiceline
+   528                              <1> ;                 push rax
+   529                              <1> ;                 mov ax, TestString
+   530                              <1> ;                 push rax
+   531                              <1> 
+   532                              <1> ;                 call printf
+   533                              <1> ;                 .PAUSE
+   534                              <1> 
+   535                              <1> ;                 add sp, 16
+   536                              <1> 
+   537                              <1> ;                 ret
+   538                              <1> 
+   539                              <1> ; section .data 
+   540                              <1> 
+   541                              <1> ; TestString      db "(Test %%s) Saymon says: %s", 0Ah, 24h
+   542                              <1> ; Voiceline       db "Hello world!$"
    543                              <1> 
-   544                              <1> ;                 call printf
-   545                              <1> ;                 .PAUSE
-   546                              <1> 
-   547                              <1> ;                 add sp, 16
-   548                              <1> 
-   549                              <1> ;                 ret
-   550                              <1> 
-   551                              <1> ; section .data 
+   544                              <1> ; ;----------------DigitUnitTest-------------------
+   545                              <1> ; ;
+   546                              <1> ; ; Descr: Test '%d' in printf
+   547                              <1> ; ;
+   548                              <1> ; ; Entry: None
+   549                              <1> ; ; Exit:  None
+   550                              <1> ; ; Destr: same as printf
+   551                              <1> ; ;------------------------------------------------
    552                              <1> 
-   553                              <1> ; TestDigit       db "(Test %%d) 2 multiply by 3 is %d", 0Ah, 24h
+   553                              <1> ; section .text 
    554                              <1> 
-   555                              <1> ; ;------------------HexUnitTest-------------------
-   556                              <1> ; ;
-   557                              <1> ; ; Descr: Test '%x' in printf
-   558                              <1> ; ;
-   559                              <1> ; ; Entry: None
-   560                              <1> ; ; Exit:  None
-   561                              <1> ; ; Destr: same as printf
-   562                              <1> ; ;------------------------------------------------
+   555                              <1> ; DigitUnitTest   
+   556                              <1> ;                 mov ax, 6
+   557                              <1> ;                 push rax 
+   558                              <1> ;                 mov ax, TestDigit
+   559                              <1> ;                 push rax
+   560                              <1> 
+   561                              <1> ;                 call printf
+   562                              <1> ;                 .PAUSE
    563                              <1> 
-   564                              <1> ; section .text 
+   564                              <1> ;                 add sp, 16
    565                              <1> 
-   566                              <1> ; HexUnitTest     
-   567                              <1> ;                 mov ax, 31 
-   568                              <1> ;                 push rax
-   569                              <1> ;                 mov ax, TestHex
-   570                              <1> ;                 push rax
+   566                              <1> ;                 ret
+   567                              <1> 
+   568                              <1> ; section .data 
+   569                              <1> 
+   570                              <1> ; TestDigit       db "(Test %%d) 2 multiply by 3 is %d", 0Ah, 24h
    571                              <1> 
-   572                              <1> ;                 call printf 
-   573                              <1> ;                 .PAUSE
-   574                              <1> 
-   575                              <1> ;                 add sp, 16
-   576                              <1> 
-   577                              <1> ;                 ret 
-   578                              <1> 
-   579                              <1> ; section .data 
+   572                              <1> ; ;------------------HexUnitTest-------------------
+   573                              <1> ; ;
+   574                              <1> ; ; Descr: Test '%x' in printf
+   575                              <1> ; ;
+   576                              <1> ; ; Entry: None
+   577                              <1> ; ; Exit:  None
+   578                              <1> ; ; Destr: same as printf
+   579                              <1> ; ;------------------------------------------------
    580                              <1> 
-   581                              <1> ; TestHex         db "(Test %%x) 31 in hex is %x", 0Ah, 24h
+   581                              <1> ; section .text 
    582                              <1> 
-   583                              <1> ; ;------------------OctUnitTest-------------------
-   584                              <1> ; ;
-   585                              <1> ; ; Descr: Test '%o' in printf
-   586                              <1> ; ;
-   587                              <1> ; ; Entry: None
-   588                              <1> ; ; Exit:  None
-   589                              <1> ; ; Destr: same as printf
-   590                              <1> ; ;------------------------------------------------
+   583                              <1> ; HexUnitTest     
+   584                              <1> ;                 mov ax, 31 
+   585                              <1> ;                 push rax
+   586                              <1> ;                 mov ax, TestHex
+   587                              <1> ;                 push rax
+   588                              <1> 
+   589                              <1> ;                 call printf 
+   590                              <1> ;                 .PAUSE
    591                              <1> 
-   592                              <1> ; section .text 
+   592                              <1> ;                 add sp, 16
    593                              <1> 
-   594                              <1> ; OctUnitTest     
-   595                              <1> ;                 mov ax, 31 
-   596                              <1> ;                 push rax
-   597                              <1> ;                 mov ax, TestOct
-   598                              <1> ;                 push rax
+   594                              <1> ;                 ret 
+   595                              <1> 
+   596                              <1> ; section .data 
+   597                              <1> 
+   598                              <1> ; TestHex         db "(Test %%x) 31 in hex is %x", 0Ah, 24h
    599                              <1> 
-   600                              <1> ;                 call Printf
-   601                              <1> ;                 .PAUSE
-   602                              <1> 
-   603                              <1> ;                 add sp, 16
-   604                              <1> 
-   605                              <1> ;                 ret
-   606                              <1> 
-   607                              <1> ; section .data 
+   600                              <1> ; ;------------------OctUnitTest-------------------
+   601                              <1> ; ;
+   602                              <1> ; ; Descr: Test '%o' in printf
+   603                              <1> ; ;
+   604                              <1> ; ; Entry: None
+   605                              <1> ; ; Exit:  None
+   606                              <1> ; ; Destr: same as printf
+   607                              <1> ; ;------------------------------------------------
    608                              <1> 
-   609                              <1> ; TestOct         db "(Test %%0) 31 in oct is %o", 0Ah, 24h
+   609                              <1> ; section .text 
    610                              <1> 
-   611                              <1> ; ;------------------BinUnitTest-------------------
-   612                              <1> ; ;
-   613                              <1> ; ; Descr: Test '%b' in printf
-   614                              <1> ; ;
-   615                              <1> ; ; Entry: None
-   616                              <1> ; ; Exit:  None
-   617                              <1> ; ; Destr: same as printf
-   618                              <1> ; ;------------------------------------------------
+   611                              <1> ; OctUnitTest     
+   612                              <1> ;                 mov ax, 31 
+   613                              <1> ;                 push rax
+   614                              <1> ;                 mov ax, TestOct
+   615                              <1> ;                 push rax
+   616                              <1> 
+   617                              <1> ;                 call Printf
+   618                              <1> ;                 .PAUSE
    619                              <1> 
-   620                              <1> ; section .text 
+   620                              <1> ;                 add sp, 16
    621                              <1> 
-   622                              <1> ; BinUnitTest     
-   623                              <1> ;                 mov ax, 31
-   624                              <1> ;                 push rax
-   625                              <1> ;                 mov ax, TestBin
-   626                              <1> ;                 push rax 
+   622                              <1> ;                 ret
+   623                              <1> 
+   624                              <1> ; section .data 
+   625                              <1> 
+   626                              <1> ; TestOct         db "(Test %%0) 31 in oct is %o", 0Ah, 24h
    627                              <1> 
-   628                              <1> ;                 call printf 
-   629                              <1> ;                 .PAUSE
-   630                              <1> 
-   631                              <1> ;                 add sp, 16
-   632                              <1> 
-   633                              <1> ;                 ret 
-   634                              <1> 
-   635                              <1> ; section .data 
+   628                              <1> ; ;------------------BinUnitTest-------------------
+   629                              <1> ; ;
+   630                              <1> ; ; Descr: Test '%b' in printf
+   631                              <1> ; ;
+   632                              <1> ; ; Entry: None
+   633                              <1> ; ; Exit:  None
+   634                              <1> ; ; Destr: same as printf
+   635                              <1> ; ;------------------------------------------------
    636                              <1> 
-   637                              <1> ; TestBin         db "(Test %%b) 31 in binary is %b", 0Ah, 24h
+   637                              <1> ; section .text 
    638                              <1> 
-   639                              <1> ; ;-----------------ComplUnitTest------------------
-   640                              <1> ; ;
-   641                              <1> ; ; Descr: tests several specifiers in printf
-   642                              <1> ; ;
-   643                              <1> ; ; Entry: None
-   644                              <1> ; ; Exit:  None
-   645                              <1> ; ; Destr: same as printf
-   646                              <1> ; ;------------------------------------------------
+   639                              <1> ; BinUnitTest     
+   640                              <1> ;                 mov ax, 31
+   641                              <1> ;                 push rax
+   642                              <1> ;                 mov ax, TestBin
+   643                              <1> ;                 push rax 
+   644                              <1> 
+   645                              <1> ;                 call printf 
+   646                              <1> ;                 .PAUSE
    647                              <1> 
-   648                              <1> ; section .text 
+   648                              <1> ;                 add sp, 16
    649                              <1> 
-   650                              <1> ; ComplUnitTest   
-   651                              <1> ;                 mov ax, 18
-   652                              <1> ;                 push rax
-   653                              <1> ;                 push rax
-   654                              <1> ;                 mov ax, My_name
-   655                              <1> ;                 push rax 
-   656                              <1> ;                 mov ax, '!'
-   657                              <1> ;                 push rax 
-   658                              <1> ;                 mov ax, TestTest
-   659                              <1> ;                 push rax 
-   660                              <1> 
-   661                              <1> ;                 call printf
-   662                              <1> ;                 .PAUSE
-   663                              <1> 
-   664                              <1> ;                 add sp, 40
-   665                              <1> 
-   666                              <1> ;                 ret 
-   667                              <1> 
-   668                              <1> ; section .data  
-   669                              <1> 
-   670                              <1> ; TestTest        db "(Test various %%) Hello%c, my %1 name is %s, my %age is %d, in hex it is %x", 0Ah, 24h
-   671                              <1> ; My_name         db "Rustam$"
-   672                              <1> 
-   673                              <1> ; ;==================================================================================================
-   674                              <1> 
-   675                              <1> ; ;--------------------RNUMTOA---------------------
-   676                              <1> ; ;
-   677                              <1> ; ; Description: Translates number into string
-   678                              <1> ; ; Entry:       ES - points to the segment, where
-   679                              <1> ; ;                   string will be stored
-   680                              <1> ; ;              DI - points to the address of the
-   681                              <1> ; ;                   first symbol in string
-   682                              <1> ; ;              BX - number to be translated
-   683                              <1> ; ;              CX - base of the numeric system 
-   684                              <1> ; ; Exit:        DI remains it value
-   685                              <1> ; ;              SI - number of symbols in string
-   686                              <1> ; ; Destr:       BX, AX, DX
-   687                              <1> ; ;------------------------------------------------
-   688                              <1> 
-   689                              <1> ; section .text 
-   690                              <1> 
-   691                              <1> ; rnumtoa     
-   692                              <1> ;             mov ax, bx   
-   693                              <1> ;             mov si, 1           ; start value of counter       
-   694                              <1> 
-   695                              <1> ;         rnumtoaCount:           ; counting offset
-   696                              <1> ;             xor dx, dx
-   697                              <1> ;             div cx
-   698                              <1> 
-   699                              <1> ;             cmp ax, 0
-   700                              <1> ;             je rnumtoaMain
-   701                              <1> ;             inc di              ; iterate to next symb
-   702                              <1> ;             inc si              ; increments counter
-   703                              <1> ;             jmp rnumtoaCount
-   704                              <1> 
-   705                              <1> ;         rnumtoaMain:
-   706                              <1> ;             mov ax, bx
+   650                              <1> ;                 ret 
+   651                              <1> 
+   652                              <1> ; section .data 
+   653                              <1> 
+   654                              <1> ; TestBin         db "(Test %%b) 31 in binary is %b", 0Ah, 24h
+   655                              <1> 
+   656                              <1> ; ;-----------------ComplUnitTest------------------
+   657                              <1> ; ;
+   658                              <1> ; ; Descr: tests several specifiers in printf
+   659                              <1> ; ;
+   660                              <1> ; ; Entry: None
+   661                              <1> ; ; Exit:  None
+   662                              <1> ; ; Destr: same as printf
+   663                              <1> ; ;------------------------------------------------
+   664                              <1> 
+   665                              <1> ; section .text 
+   666                              <1> 
+   667                              <1> ; ComplUnitTest   
+   668                              <1> ;                 mov ax, 18
+   669                              <1> ;                 push rax
+   670                              <1> ;                 push rax
+   671                              <1> ;                 mov ax, My_name
+   672                              <1> ;                 push rax 
+   673                              <1> ;                 mov ax, '!'
+   674                              <1> ;                 push rax 
+   675                              <1> ;                 mov ax, TestTest
+   676                              <1> ;                 push rax 
+   677                              <1> 
+   678                              <1> ;                 call printf
+   679                              <1> ;                 .PAUSE
+   680                              <1> 
+   681                              <1> ;                 add sp, 40
+   682                              <1> 
+   683                              <1> ;                 ret 
+   684                              <1> 
+   685                              <1> ; section .data  
+   686                              <1> 
+   687                              <1> ; TestTest        db "(Test various %%) Hello%c, my %1 name is %s, my %age is %d, in hex it is %x", 0Ah, 24h
+   688                              <1> ; My_name         db "Rustam$"
+   689                              <1> 
+   690                              <1> ; ;==================================================================================================
+   691                              <1> 
+   692                              <1> ; ;--------------------RNUMTOA---------------------
+   693                              <1> ; ;
+   694                              <1> ; ; Description: Translates number into string
+   695                              <1> ; ; Entry:       ES - points to the segment, where
+   696                              <1> ; ;                   string will be stored
+   697                              <1> ; ;              DI - points to the address of the
+   698                              <1> ; ;                   first symbol in string
+   699                              <1> ; ;              BX - number to be translated
+   700                              <1> ; ;              CX - base of the numeric system 
+   701                              <1> ; ; Exit:        DI remains it value
+   702                              <1> ; ;              SI - number of symbols in string
+   703                              <1> ; ; Destr:       BX, AX, DX
+   704                              <1> ; ;------------------------------------------------
+   705                              <1> 
+   706                              <1> ; section .text 
    707                              <1> 
-   708                              <1> ;         rnumtoaLoop:
-   709                              <1> ;             xor dx, dx          ; for 'div' command
-   710                              <1> ;             div cx
+   708                              <1> ; rnumtoa     
+   709                              <1> ;             mov ax, bx   
+   710                              <1> ;             mov si, 1           ; start value of counter       
    711                              <1> 
-   712                              <1> ;             mov bx, dx          ; converting remainder to symbol
-   713                              <1> ;             mov dl, [bx + RSYMB_TABLE]   
-   714                              <1> ;                                    ; prints number from end
-   715                              <1> ;             mov es:[di], dl     
-   716                              <1> ;             dec di              ; iterate to next symbol
-   717                              <1> 
-   718                              <1> ;             cmp ax, 0
-   719                              <1> ;             jne rnumtoaLoop
-   720                              <1> 
-   721                              <1> ;             inc di              ; si points to the start of string
-   722                              <1> ;             ret
-   723                              <1> 
-   724                              <1> ; section .data 
-   725                              <1> 
-   726                              <1> ; RSYMB_TABLE db '0123456789ABCDEF'
-   727                              <1> 
-   728                              <1> ; ;-----------------RNUMTOA2-----------------------
-   729                              <1> ; ;
-   730                              <1> ; ; Description: optimized version of 'rnumtoa'
-   731                              <1> ; ;              function, used for numeric systems
-   732                              <1> ; ;              with base 2^n, n = 1, 2, 3 or 4
-   733                              <1> ; ; Entry:       ES - points to the segment, where
-   734                              <1> ; ;                   string will be stored
-   735                              <1> ; ;              DI - points to the first symbol 
-   736                              <1> ; ;                   in this string
-   737                              <1> ; ;              AX - number to be translated
-   738                              <1> ; ;              CL - n
-   739                              <1> ; ;              DX - mask
-   740                              <1> ; ; Exit:        DI - remains it value
-   741                              <1> ; ;              SI - number of charasters in string
-   742                              <1> ; ; Destr:       AX, SI, BX
-   743                              <1> ; ;------------------------------------------------
+   712                              <1> ;         rnumtoaCount:           ; counting offset
+   713                              <1> ;             xor dx, dx
+   714                              <1> ;             div cx
+   715                              <1> 
+   716                              <1> ;             cmp ax, 0
+   717                              <1> ;             je rnumtoaMain
+   718                              <1> ;             inc di              ; iterate to next symb
+   719                              <1> ;             inc si              ; increments counter
+   720                              <1> ;             jmp rnumtoaCount
+   721                              <1> 
+   722                              <1> ;         rnumtoaMain:
+   723                              <1> ;             mov ax, bx
+   724                              <1> 
+   725                              <1> ;         rnumtoaLoop:
+   726                              <1> ;             xor dx, dx          ; for 'div' command
+   727                              <1> ;             div cx
+   728                              <1> 
+   729                              <1> ;             mov bx, dx          ; converting remainder to symbol
+   730                              <1> ;             mov dl, [bx + RSYMB_TABLE]   
+   731                              <1> ;                                    ; prints number from end
+   732                              <1> ;             mov es:[di], dl     
+   733                              <1> ;             dec di              ; iterate to next symbol
+   734                              <1> 
+   735                              <1> ;             cmp ax, 0
+   736                              <1> ;             jne rnumtoaLoop
+   737                              <1> 
+   738                              <1> ;             inc di              ; si points to the start of string
+   739                              <1> ;             ret
+   740                              <1> 
+   741                              <1> ; section .data 
+   742                              <1> 
+   743                              <1> ; RSYMB_TABLE db '0123456789ABCDEF'
    744                              <1> 
-   745                              <1> ; section .text 
-   746                              <1> 
-   747                              <1> ; rnumtoa2    
-   748                              <1> ;             mov bx, ax
-   749                              <1> ;             mov si, 1           ; start value of symb counter
-   750                              <1> 
-   751                              <1> ;         rnumtoa2Count:          ; count shift in string
-   752                              <1> ;             shr bx, cl
-   753                              <1> ;             cmp bx, 0
-   754                              <1> ;             je  rnumtoa2Loop    ; stop if bx == 0 
-   755                              <1> 
-   756                              <1> ;             inc di              ; move si to next symbol
-   757                              <1> ;             inc si              ; incfrement additional counter
-   758                              <1> ;             jmp rnumtoa2Count   ; repeat while bx != 0
-   759                              <1> 
-   760                              <1> ;         rnumtoa2Loop:           ; main cycle
-   761                              <1> ;             mov bx, ax 
-   762                              <1> ;             and bx, dx          ; using mask
+   745                              <1> ; ;-----------------RNUMTOA2-----------------------
+   746                              <1> ; ;
+   747                              <1> ; ; Description: optimized version of 'rnumtoa'
+   748                              <1> ; ;              function, used for numeric systems
+   749                              <1> ; ;              with base 2^n, n = 1, 2, 3 or 4
+   750                              <1> ; ; Entry:       ES - points to the segment, where
+   751                              <1> ; ;                   string will be stored
+   752                              <1> ; ;              DI - points to the first symbol 
+   753                              <1> ; ;                   in this string
+   754                              <1> ; ;              AX - number to be translated
+   755                              <1> ; ;              CL - n
+   756                              <1> ; ;              DX - mask
+   757                              <1> ; ; Exit:        DI - remains it value
+   758                              <1> ; ;              SI - number of charasters in string
+   759                              <1> ; ; Destr:       AX, SI, BX
+   760                              <1> ; ;------------------------------------------------
+   761                              <1> 
+   762                              <1> ; section .text 
    763                              <1> 
-   764                              <1> ;             mov bl, [bx + XlatTable]           
-   765                              <1> ;             mov es:[di], bl     ; store translated code of the symbol
-   766                              <1> ;             dec di              ; move to next symbol in string
+   764                              <1> ; rnumtoa2    
+   765                              <1> ;             mov bx, ax
+   766                              <1> ;             mov si, 1           ; start value of symb counter
    767                              <1> 
-   768                              <1> ;             shr ax, cl          ; ax := 2^base
-   769                              <1> ;             cmp ax, 0           
-   770                              <1> 
-   771                              <1> ;             jne rnumtoa2Loop    ; repeat while si != 0
+   768                              <1> ;         rnumtoa2Count:          ; count shift in string
+   769                              <1> ;             shr bx, cl
+   770                              <1> ;             cmp bx, 0
+   771                              <1> ;             je  rnumtoa2Loop    ; stop if bx == 0 
    772                              <1> 
-   773                              <1> ;             inc di              ; di points to the start
-   774                              <1> ;             ret
-   775                              <1> 
-   776                              <1> ; section .data 
-   777                              <1> 
-   778                              <1> ; XlatTable db '0123456789ABCDEF' ; translation table
+   773                              <1> ;             inc di              ; move si to next symbol
+   774                              <1> ;             inc si              ; incfrement additional counter
+   775                              <1> ;             jmp rnumtoa2Count   ; repeat while bx != 0
+   776                              <1> 
+   777                              <1> ;         rnumtoa2Loop:           ; main cycle
+   778                              <1> ;             mov bx, ax 
+   779                              <1> ;             and bx, dx          ; using mask
+   780                              <1> 
+   781                              <1> ;             mov bl, [bx + XlatTable]           
+   782                              <1> ;             mov es:[di], bl     ; store translated code of the symbol
+   783                              <1> ;             dec di              ; move to next symbol in string
+   784                              <1> 
+   785                              <1> ;             shr ax, cl          ; ax := 2^base
+   786                              <1> ;             cmp ax, 0           
+   787                              <1> 
+   788                              <1> ;             jne rnumtoa2Loop    ; repeat while si != 0
+   789                              <1> 
+   790                              <1> ;             inc di              ; di points to the start
+   791                              <1> ;             ret
+   792                              <1> 
+   793                              <1> ; section .data 
+   794                              <1> 
+   795                              <1> ; XlatTable db '0123456789ABCDEF' ; translation table
     23                                                                          ; printf function
     24                                  %include    "RsItoa.s"           
      1                              <1> %ifndef rsItoa
@@ -943,20 +960,37 @@
      9                              <1> 
     10                              <1> ;--------------------Strlen----------------------
     11                              <1> ;
-    12                              <1> ; Descr:
-    13                              <1> ; Entry:
-    14                              <1> ; Exit:
-    15                              <1> ; Desrt:
-    16                              <1> ;-------------------------------------------------
-    17                              <1> 
-    18                              <1> RsStrlen
-    18          ******************  <1>  warning: label alone on a line without a colon might be in error [-w+orphan-labels]
-    19                              <1> 
-    20 00000079 C3                  <1>             ret 
-    21                              <1> 
-    22                              <1> ;================================================
-    23                              <1> 
-    24                              <1> %endif
+    12                              <1> ; Descr:   count lenght of the null-terimanted 
+    13                              <1> ;                                       string
+    14                              <1> ; Entry:   RDI - address of the string
+    15                              <1> ;
+    16                              <1> ; Exit:    RCX - lenght of the string
+    17                              <1> ;
+    18                              <1> ; Desrt:   RDI
+    19                              <1> ;-------------------------------------------------
+    20                              <1> 
+    21                              <1> RsStrlen    
+    21          ******************  <1>  warning: label alone on a line without a colon might be in error [-w+orphan-labels]
+    22 00000079 4831C9              <1>             xor rcx, rcx
+    23 0000007C 48F7D9              <1>             neg rcx                     ; rcx == 0xFFFFFFFFFFFFFFFF
+    24                              <1>             
+    25                              <1>         .loop:
+    26 0000007F 803F00              <1>             cmp byte [rdi], 0
+    27 00000082 7405                <1>             je .ret                     ; if ([rdi] == 0) stop
+    28                              <1> 
+    29 00000084 48FFC7              <1>             inc rdi                     ; iterate to next symb
+    30 00000087 E2F6                <1>             loop .loop                  ; while ([di] != 0)
+    31                              <1> 
+    32                              <1>         .ret 
+    32          ******************  <1>  warning: label alone on a line without a colon might be in error [-w+orphan-labels]
+    33                              <1>             ;add rcx, 2                   ; get lenght of the string
+    34 00000089 48F7D9              <1>             neg rcx      
+    35                              <1> 
+    36 0000008C C3                  <1>             ret 
+    37                              <1> 
+    38                              <1> ;================================================
+    39                              <1> 
+    40                              <1> %endif
     28                                                                          ; strlen function
     29                                  
     30                                  ;%include unittest64.s                  
@@ -971,33 +1005,38 @@
     39                                  
     40                                  global _start
     41                                  
-    42 0000007A 41B904000000            _start:     mov r9, 4d
-    43 00000080 BA0F000000                          mov rdx, 0Fh
-    44 00000085 488D3C25[10000000]                  lea rdi, [MainBuf]
-    45 0000008D 48BB5FC2255B020000-                 mov rbx, 25B25C25Fh
-    45 00000096 00                 
+    42                                  _start:     
+    43 0000008D 488D3C25[10000000]                  lea rdi, [TestString]
+    44                                  
+    45 00000095 E8DFFFFFFF                          call RsStrlen
     46                                  
-    47 00000097 E8A0FFFFFF                          call RsItoa2n 
-    48                                  
-    49 0000009C B801000000                          mov rax, 01h                ; write
-    50 000000A1 BF01000000                          mov rdi, 1                  ; stdout
-    51 000000A6 488D3425[10000000]                  lea rsi, [MainBuf]          ; char* buf
-    52 000000AE 4C89C2                              mov rdx, r8                 ; rdx = number of symbols
+    47 0000009A 41B904000000                        mov r9, 4d
+    48 000000A0 BA0F000000                          mov rdx, 0Fh
+    49 000000A5 488D3C25[11000000]                  lea rdi, [MainBuf]
+    50 000000AD 4889CB                              mov rbx, rcx 
+    51                                  
+    52 000000B0 E887FFFFFF                          call RsItoa2n 
     53                                  
-    54 000000B1 0F05                                syscall                     ; call write 
-    55                                  
-    56                                              .EXIT
-    56                              <1> 
-    56 000000B3 4831FF              <1>  xor rdi, rdi
-    56 000000B6 B83C000000          <1>  mov rax, 03Ch
-    56 000000BB 0F05                <1>  syscall
-    57                                  
-    58                                  ;================================================
-    59                                  
-    60                                  section .data 
-    61                                  
-    62 00000010 01<rept>                MainBuf:    times 64 db (1)
-    63                                  
+    54 000000B5 B801000000                          mov rax, 01h                ; write
+    55 000000BA BF01000000                          mov rdi, 1                  ; stdout
+    56 000000BF 488D3425[11000000]                  lea rsi, [MainBuf]          ; char* buf
+    57 000000C7 4C89C2                              mov rdx, r8                 ; rdx = number of symbols
+    58                                  
+    59 000000CA 0F05                                syscall                     ; call write 
+    60                                  
+    61                                              .EXIT
+    61                              <1> 
+    61 000000CC 4831FF              <1>  xor rdi, rdi
+    61 000000CF B83C000000          <1>  mov rax, 03Ch
+    61 000000D4 0F05                <1>  syscall
+    62                                  
+    63                                  ;================================================
     64                                  
-    65                                  
+    65                                  section .data 
     66                                  
+    67 00000010 00                      TestString:          db 0
+    68 00000011 01<rept>                MainBuf:    times 64 db (1)
+    69                                  
+    70                                  
+    71                                  
+    72                                  
