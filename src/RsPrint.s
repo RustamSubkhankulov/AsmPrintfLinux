@@ -47,7 +47,6 @@ RsPrint:
 
             xor rdx, rdx                ; counter of symbols 
 
-            mov rax, 01h                ; 'write' syscall code
             mov rdi, 01h                ; stdout
 
         .loop:
@@ -64,6 +63,7 @@ RsPrint:
             cmp rdx, 0                  ; if counter == 0
             je .arg                     ; no need to write
 
+            mov rax, 01h                ; 'write' syscall code
             syscall                     ; else write
 
         .arg:
@@ -74,6 +74,7 @@ RsPrint:
             cmp rdx, 0                  ; if counter == 0
             je .ret                     ; no need to write 
 
+            mov rax, 01h                ; 'write' syscall code
             syscall                     ; else write
 
         .ret: 
@@ -177,6 +178,7 @@ RsPrintArg:
 
         .casedefault:
             mov rdx, 2                  ; write "%%"
+            mov rax, 01d                ; 'write' syscall 
             syscall 
 
         .fin: 

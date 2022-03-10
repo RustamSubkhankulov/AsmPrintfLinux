@@ -15,10 +15,12 @@ section .text
 ;
 ; Exit:    RCX - lenght of the string
 ;
-; Desrt:   RSI
+; Desrt:   none
 ;-------------------------------------------------
 
 RsStrlen:    
+            push rsi                    ; save rsi value
+
             xor rcx, rcx
             neg rcx                     ; rcx == 0xFFFFFFFFFFFFFFFF
             
@@ -32,6 +34,8 @@ RsStrlen:
         .ret: 
             ;add rcx, 2                   ; get lenght of the string
             neg rcx      
+
+            pop rsi                     ; restore rsi value 
 
             ret 
 

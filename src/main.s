@@ -17,6 +17,33 @@ section .text
 
 ;------------------------------------------------
 
+;-------------------.PAUSE-----------------------
+
+%macro      .PAUSE 0 
+                                        ; getchar();
+		    nop
+		    xor rax, rax                ; read
+
+		    mov rdi, 0                  ; stdin - first arg
+            mov rsi, PauseBuf
+                                        ; char* buf - second arg
+            mov rdx, 1                  ; read one byte
+
+            syscall                     ; call read         
+            
+		    nop
+%endmacro
+
+;------------------------------------------------
+
+section .data 
+
+PauseBuf    db 0                        ; reads one symb
+
+section .text
+
+;------------------------------------------------
+
 ;==================Includes======================
 
 %include    "RsPrint.s"                      
@@ -41,23 +68,32 @@ global _start
 
 _start:     
 
-            ;call CharUnitTest
+            call CharUnitTest
+            .PAUSE
 
             call StrUnitTest
+            .PAUSE
 
-            ;call DecUnitTest
+            call DecUnitTest
+            .PAUSE
 
-            ;call OctUnitTest
+            call OctUnitTest
+            .PAUSE
 
-            ;call HexUnitTest
+            call HexUnitTest
+            .PAUSE
 
-            ;call BinUnitTest
+            call BinUnitTest
+            .PAUSE
 
-            ;call PercUnitTest
+            call PercUnitTest
+            .PAUSE
 
-            ;call DefUnitTest
+            call DefUnitTest
+            .PAUSE
 
-            ;call ComplexUnitTest
+            call ComplexUnitTest
+            .PAUSE
 
             .EXIT
 

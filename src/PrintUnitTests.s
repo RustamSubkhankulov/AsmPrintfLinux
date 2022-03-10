@@ -219,7 +219,7 @@ section .data
 
 ;------------------------------------------------
 
-PercFormatStr:  db "Testing %%%%", 0Ah, 0
+PercFormatStr:  db "Testing %%%% : %%", 0Ah, 0
 
 ;------------------------------------------------
 
@@ -227,32 +227,32 @@ DefFormatStr:   db "Testing default case: %a %1 %$", 0Ah, 0
 
 ;------------------------------------------------
 
-CharFormatStr:  db "Testing %%c: printing symbol %c", 0Ah, 0
+CharFormatStr:  db "Testing %%c: printing symbol ! -  %c", 0Ah, 0
 
 ;------------------------------------------------
 
-StrFormatStr:   db "Testing %%s: string - %s", 0Ah, 0
+StrFormatStr:   db "Testing %%s: string 'Rustam' - %s", 0Ah, 0
 
 ;------------------------------------------------
 
-BinFormatStr:   db "Testing %%b: %b", 0Ah, 0
+BinFormatStr:   db "Testing %%b: number 1011011 - %b", 0Ah, 0
 
 ;------------------------------------------------
 
-DecFormatStr:   db "Testing %%d: %d", 0Ah, 0
+DecFormatStr:   db "Testing %%d: number 1256 - %d", 0Ah, 0
 
 ;------------------------------------------------
 
-OctFormatStr:   db "Testing %%o: %0", 0Ah, 0
+OctFormatStr:   db "Testing %%o: number 30 - %o", 0Ah, 0
 
 ;------------------------------------------------
 
-HexFormatStr:   db "Testin %%x: %x", 0Ah, 0
+HexFormatStr:   db "Testin %%x: 25F25A - %x", 0Ah, 0
 
 ;------------------------------------------------
 
 ComplexFormatStr:
-                db "String: %s, char %c, decimal %d, binary %b, oct %o, hex %x", 0Ah, 0
+                db "String: Rustam - %s, char ! - %c, decimal 256255 - %d, binary 10110011 - %b, oct 30 - %o, hex 25AB - %x", 0Ah, 0
 
 ;================================================
 
