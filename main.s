@@ -4,14 +4,18 @@
 
 .section text 
 
+;====================Macro=======================
+
+%macro      
+
 ;==================Includes======================
 
-%include print64.s                      
+%include    print64.s                      
                                         ; printf function
-%include itoa64.s           
+%include    itoa64.s           
                                         ; itoa function
 
-%include strlen64.s                     
+;%include    strlen64.s                     
                                         ; strlen function
 
 ;%include unittest64.s                  

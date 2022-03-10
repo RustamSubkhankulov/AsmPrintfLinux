@@ -11,14 +11,14 @@ section .text
 ;
 ; Descr: translates number to string of symbols
 ;
-; Exit : DI remains its value
+; Exit : RDI remains its value
 ;        R8 - number of symbols in string
 ;
-; Entry: DI - start of the string
+; Entry: RDI - start of the string
 ;        R9 - base of numeric system 
 ;        RBX - number to be translated
 ;
-; Destr: RAX, RDX, 
+; Destr: RAX, RDX
 ;================================================
 
 Itoa64 
@@ -59,11 +59,16 @@ Itoa64
 ;
 ; Descr: optimized version of the itoa64, made for
 ;        numeric sytems with base - power of two
+;
 ; Entry: RBX - number to be translated
 ;        R9  - n
 ;        RDX - mask for division (2^n - 1)
-; Exit:
-; Destr:
+;        RDI - start of the string
+;
+; Exit : RDI remains its value
+;        R8 - number of symbols in string
+;
+; Destr: RAX, RBX
 ;================================================
 
 Itoa64_2
@@ -83,14 +88,14 @@ Itoa64_2
         jmp .CountOffset
 
     .loop
-        mov rbx, rax                    ; get value 
-        and rbx, rdx                    ; use mask
+        mov rax, rbx                    ; get value 
+        and rax, rdx                    ; use mask
 
-        mov bl, [rbx + XlatTable64]     ; translate code
+        mov bl, [rax + XlatTable64]     ; translate code
         mov [rdi], bl                   ; store in sting
         dec rdi                         ; iterate to next
 
-        shr rax, r9                     ; ax /= 2^base
+        shr rbx, r9                     ; ax /= 2^base
 
         cmp rax, 0                      
         jne .loop                       ; while (rax != 0)
