@@ -1,13 +1,13 @@
-%ifndef itoa64
+%ifndef Itoa64
+%define Itoa64 
 
 ;================================================
-;================================================
-
-%define itoa64 
 
 section .text 
 
-;===================Itoa64=======================
+;==================FUNCTIONS=====================
+
+;-------------------Itoa64-----------------------
 ;
 ; Descr: translates number to string of symbols
 ;
@@ -19,7 +19,7 @@ section .text
 ;        RBX - number to be translated
 ;
 ; Destr: RAX, RDX
-;================================================
+;------------------------------------------------
 
 Itoa64 
         mov rax, rbx                    ; get value for
@@ -55,7 +55,7 @@ Itoa64
         inc rdi                         ; di point to the start of string
         ret 
 
-;===================Itoa64_2=====================
+;--------------------Itoa64_2--------------------
 ;
 ; Descr: optimized version of the itoa64, made for
 ;        numeric sytems with base - power of two
@@ -69,7 +69,7 @@ Itoa64
 ;        R8 - number of symbols in string
 ;
 ; Destr: RAX, RBX
-;================================================
+;------------------------------------------------
 
 Itoa64_2
 
@@ -103,13 +103,12 @@ Itoa64_2
         inc rdi                         ; rdi -> start of the string
         ret 
 
-;================================================
+;------------------------------------------------
 
 section .data 
 
 XlatTable64 db "0123456789ABCDEF"       ; translation table
 
-;================================================
 ;================================================
 
 %endif
