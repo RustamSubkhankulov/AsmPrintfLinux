@@ -57,8 +57,11 @@ Itoa64
 
 ;===================Itoa64_2=====================
 ;
-; Descr:
-; Entry:
+; Descr: optimized version of the itoa64, made for
+;        numeric sytems with base - power of two
+; Entry: RBX - number to be translated
+;        R9  - n
+;        RDX - mask for division (2^n - 1)
 ; Exit:
 ; Destr:
 ;================================================
@@ -88,8 +91,11 @@ Itoa64_2
         dec rdi                         ; iterate to next
 
         shr rax, r9                     ; ax /= 2^base
-        cmp rax, 
 
+        cmp rax, 0                      
+        jne .loop                       ; while (rax != 0)
+
+        inc rdi                         ; rdi -> start of the string
         ret 
 
 ;================================================
