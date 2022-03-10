@@ -21,12 +21,12 @@ section .text
 ; Destr: RAX, RDX
 ;------------------------------------------------
 
-RsItoa
+RsItoa:
         mov rax, rbx                    ; get value for
                                         ; counting offset
         mov r8, 1                       ; at least ine symb in string
 
-    .CountOffset
+    .CountOffset:
         xor rdx, rdx                    ; rdx:rax / op64 = rax, rdx = remainder 
         div r9                          ; div by base
 
@@ -37,11 +37,11 @@ RsItoa
 
         jmp .CountOffset
 
-    .main
+    .main:
         mov rax, rbx                    ; get value again
         mov rcx, r8                     ; get number of symbols
 
-    .loop
+    .loop:
         xor rdx, rdx                    ; for division
         div r9                          ; divide by base 
 
@@ -61,7 +61,7 @@ RsItoa
 ;        numeric sytems with base - power of two
 ;
 ; Entry: RBX - number to be translated
-;        R9  - n
+;        RCX  - n
 ;        RDX - mask for division (2^n - 1)
 ;        RSI - start of the string
 ;
@@ -71,16 +71,13 @@ RsItoa
 ; Destr: RAX, RBX
 ;------------------------------------------------
 
-RsItoa2n
-
-        push rcx                        ; save rcx value
-        mov rcx, r9                     ; cl = n
+RsItoa2n:
 
         mov rax, rbx                    ; get value for
                                         ; counting offset
         mov r8, 1                       ; at least ine symb in string
 
-    .CountOffset
+    .CountOffset:
         shr rax, cl 
         cmp rax, 0
         je .loop 
@@ -90,7 +87,7 @@ RsItoa2n
 
         jmp .CountOffset
 
-    .loop
+    .loop:
         mov rax, rbx                    ; get value 
         and rax, rdx                    ; use mask
 
@@ -104,8 +101,6 @@ RsItoa2n
         jne .loop                       ; while (rax != 0)
 
         inc rsi                         ; rdi -> start of the string
-        pop rcx                         ; restore rcx value 
-
         ret 
 
 ;------------------------------------------------

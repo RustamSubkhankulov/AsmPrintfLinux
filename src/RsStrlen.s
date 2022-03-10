@@ -18,7 +18,7 @@ section .text
 ; Desrt:   RSI
 ;-------------------------------------------------
 
-RsStrlen    
+RsStrlen:    
             xor rcx, rcx
             neg rcx                     ; rcx == 0xFFFFFFFFFFFFFFFF
             
@@ -29,7 +29,7 @@ RsStrlen
             inc rsi                     ; iterate to next symb
             loop .loop                  ; while ([di] != 0)
 
-        .ret 
+        .ret: 
             ;add rcx, 2                   ; get lenght of the string
             neg rcx      
 

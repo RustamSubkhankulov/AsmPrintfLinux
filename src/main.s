@@ -1,5 +1,5 @@
 ;================================================
-;                            (c) Rustamchik, 2022
+;                         (c) Rustam4ik, 2029 - 7
 ;================================================
 
 section .text 
@@ -27,7 +27,7 @@ section .text
 %include    "RsStrlen.s"                     
                                         ; strlen function
 
-;%include unittest64.s                  
+%include    "PrintUnitTests.s"                  
                                         ; unit tests for 
                                         ; printf function
 
@@ -41,29 +41,23 @@ global _start
 
 _start:     
 
-            push TestString
+            ;call CharUnitTest
 
-            call RsPrint
+            call StrUnitTest
 
-            add rsp, 8
+            ;call DecUnitTest
 
-            ;lea rdi, [TestString]
+            ;call OctUnitTest
 
-            ;call RsStrlen
+            ;call HexUnitTest
 
-            ;mov r9, 4d
-            ;mov rdx, 0Fh
-            ;lea rdi, [MainBuf]
-            ;mov rbx, rcx 
+            ;call BinUnitTest
 
-            ;call RsItoa2n 
+            ;call PercUnitTest
 
-            ;mov rax, 01h                ; write
-            ;mov rdi, 1                  ; stdout
-            ;lea rsi, [MainBuf]          ; char* buf
-            ;mov rdx, r8                 ; rdx = number of symbols
+            ;call DefUnitTest
 
-            ;ssyscall                     ; call write 
+            ;call ComplexUnitTest
 
             .EXIT
 
