@@ -115,7 +115,7 @@ RsPrintArg
 
         .jmptable 
             dq .binary                  ; %b
-            dq PrintChar                ; 1
+            dq .char                    ; 1
             dq .decimal                 ; 2
             dq .casedefault             ; 3
             dq .casedefault             ; 4
@@ -139,20 +139,24 @@ RsPrintArg
             dq .hexadecimal             ; %x
 
         .binary
-            mov cl, 1
+            mov r9, 1
             jmp .case2n
 
         .octagonal
-            mov cl, 3
+            mov r9, 3
             jmp .case2n
 
         .hexadecimal
-            mov cl, 4
+            mov r9, 4
             jmp .case2n
 
         .decimal
             call RsPrintArgDec
             jmp .fin
+
+        .char 
+            call RsPrintArgChar
+            jmp .fin 
 
         .string
             call RsPrintArgStr
@@ -169,63 +173,161 @@ RsPrintArg
         .fin 
             xor rdx, rdx                ; counter = 0
             add rsi, 2                  ; rsi -> next sym after specifier
-
+            
             ret 
 
 ;------------------RsPrintArgDec-----------------
 ;
-; Descr:
+; Descr: Prints number in decimal numeric system
 ;
-; Entry:
+; Entry: RBX -> arguments
+;        RDI == 1 (stdout)
 ;
-; Exit :
+; Exit : RBX -> next arguments (+8)
 ;
-; Destr:
+; Destr: 
 ;------------------------------------------------
 
 RsPrintArgDec
+
+            push rsi rbx                ; saving current position in format string
+                                        ; no need to save rdx
+                                        ; save current argument position in stack (rbx) 
+
+            lea rsi, [PrintArgBuf]      ; buffer for string
+            mov r9, 10d                 ; base of numeric system
+            mov rbx, [rbx]              ; get argument value
+
+            call RsItoa                 ; now R8 = number of symbols in string 
+                                        ; rsi remains it value 
+                                        ; rdi still equals 1
+
+            call RsWriteStr             ; call 'write'
+
+            pop rbx rsi                 ; restore values
+            add rbx, 8                  ; rbx -> next argument
 
             ret 
 
 ;------------------RsPrintArg2n------------------
 ;
-; Descr:
+; Descr: Print argument in numeric system with 
+;        base, that is a power of 2 (2 ^n)
 ;
-; Entry:
+; Entry: R9 == n
+;        RBX -> current argument
+;        RDI == 1(stdout)
+; Exit : RBX -> next argument (+8)
 ;
-; Exit :
-;
-; Destr:
+; Destr: RDX
 ;------------------------------------------------
 
 RsPrintArg2n
+            push rsi rbx                ; saving current position in format string
+                                        ; no need to save rdx
+                                        ; save current argument position in stack (rbx) 
+
+            lea rsi, [PrintArgBuf]      ; buffer for string
+            mov rbx, [rbx]              ; get argument value
+
+            mov rdx, 1
+            shl rdx, r9 
+            dec rdx                     ; rdx = 2^n - 1 (mask)
+
+            call RsItoa2n               ; get string in buffer
+                                        ; rsi remains its value
+                                        ; rdi still equals 1
+
+            call RsWriteStr             ; call 'write'
+
+            pop rbx rsi                 ; restore values
+            add rbx, 8                  ; rbx -> next argument
 
             ret 
 
 ;------------------RsPrintArgStr-----------------
 ;
-; Descr:
+; Descr: Writes string argument
 ;
-; Entry:
+; Entry: RDI == 1
+;        RAX == 1
+;        RBX -> current arguments ( address of string)
 ;
-; Exit:
+; Exit : RBX -> next argument (+8)
 ;
-; Destr:
+; Destr: RDX 
 ;------------------------------------------------
 
 RsPrintArgStr
+            push rsi                    ; saving current position in format string
+                                        ; no need to save rdx
+
+            mov rsi, [rbx]              ; rsi -> argument string
+            call RsStrlen               ; rcx = lenght of string
+
+            mov rdx, rcx                ; rdx = number of symbols
+                                        ; now: rax == 1, rdi == 1
+
+            syscall                     ; call 'write'
+
+            pop rsi                     ; restore value
+            add rbx, 8
 
             ret 
+
+;------------------RsPrintArgChar----------------
+;
+; Descr: Writes char argument in terminal
+;
+; Entry: RDI == 1
+;        RBX -> current  argument
+;
+; Exit:  RBX -> next argument (+8)
+;
+; Destr: RDX
+;------------------------------------------------
+
+RsPrintArgChar
+            push rsi                    ; saving current position in format string
+                                        ; no need to save rdx
+
+            mor r8, 01d                 ; one symbol
+            lea rsi, [PrintArgBuf]      ; buffer for argument
+
+            mov rdx, [rbx]              ; get argument
+            mov [rsi], rdx              ; store char in buffer
+
+            call RsWriteStr             ; call 'write'
+
+            pop rsi 
+            add rbx, 8                  ; rbx -> next argument
+
+            ret 
+            
 
 ;-------------------RsWriteStr-------------------
 ;
 ; Descr: writes particular number of symbols in 
 ;        terminal using 'write' Linux system call 
 ;
-; Entry: 
-; Exit:
+; Entry: R8 - number of synbols to be printed
+;        RSI - start of the string
+;        RDI == 1 (stdout)
 ;
-; Destr:
+; Exit:  RAX == 1
+;
+; Destr: RDX
+;------------------------------------------------
+
+RsWriteStr
+
+        mov rdx, r8                     ; rdx = number of symbols
+        mov rax, 01d                    ; 'write' syscall
+
+        syscall                         ; call write
+
+        ret 
+
 ;------------------------------------------------
 
 section .bss  

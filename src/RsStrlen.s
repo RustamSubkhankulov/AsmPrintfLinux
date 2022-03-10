@@ -11,11 +11,11 @@ section .text
 ;
 ; Descr:   count lenght of the null-terimanted 
 ;                                       string
-; Entry:   RDI - address of the string
+; Entry:   RSI - address of the string
 ;
 ; Exit:    RCX - lenght of the string
 ;
-; Desrt:   RDI
+; Desrt:   RSI
 ;-------------------------------------------------
 
 RsStrlen    
@@ -23,10 +23,10 @@ RsStrlen
             neg rcx                     ; rcx == 0xFFFFFFFFFFFFFFFF
             
         .loop:
-            cmp byte [rdi], 0
+            cmp byte [rsi], 0
             je .ret                     ; if ([rdi] == 0) stop
 
-            inc rdi                     ; iterate to next symb
+            inc rsi                     ; iterate to next symb
             loop .loop                  ; while ([di] != 0)
 
         .ret 

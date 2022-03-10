@@ -11,10 +11,10 @@ section .text
 ;
 ; Descr: translates number to string of symbols
 ;
-; Exit : RDI remains its value
+; Exit : RSI remains its value
 ;        R8 - number of symbols in string
 ;
-; Entry: RDI - start of the string
+; Entry: RSI - start of the string
 ;        R9 - base of numeric system 
 ;        RBX - number to be translated
 ;
@@ -33,7 +33,7 @@ RsItoa
         cmp rax, 0                      ; cmp result with 0
         je .main                        ; if equal, jmp to main 
         inc r8                          ; increment addition counter
-        inc rdi                         ; move to next symbol
+        inc rsi                         ; move to next symbol
 
         jmp .CountOffset
 
@@ -47,12 +47,12 @@ RsItoa
 
         mov dl, [rdx + XlatTable64]     ; converting symbol
 
-        mov [rdi], dl                   ; place symbol in string
-        dec rdi                         ; iterate to next one
+        mov [rsi], dl                   ; place symbol in string
+        dec rsi                         ; iterate to next one
 
         loop .loop                      ; repeat rcx times
 
-        inc rdi                         ; di point to the start of string
+        inc rsi                         ; di point to the start of string
         ret 
 
 ;--------------------RsItoa2n--------------------
@@ -63,9 +63,9 @@ RsItoa
 ; Entry: RBX - number to be translated
 ;        R9  - n
 ;        RDX - mask for division (2^n - 1)
-;        RDI - start of the string
+;        RSI - start of the string
 ;
-; Exit : RDI remains its value
+; Exit : RSI remains its value
 ;        R8 - number of symbols in string
 ;
 ; Destr: RAX, RBX
@@ -86,7 +86,7 @@ RsItoa2n
         je .loop 
 
         inc r8                          ; increment addition counter
-        inc rdi                         ; move to next symbol
+        inc rsi                         ; move to next symbol
 
         jmp .CountOffset
 
@@ -95,15 +95,15 @@ RsItoa2n
         and rax, rdx                    ; use mask
 
         mov al, [rax + XlatTable64]     ; translate code
-        mov [rdi], al                   ; store in sting
-        dec rdi                         ; iterate to next
+        mov [rsi], al                   ; store in sting
+        dec rsi                         ; iterate to next
 
         shr rbx, cl                   ; ax /= 2^base
 
         cmp rbx, 0                      
         jne .loop                       ; while (rax != 0)
 
-        inc rdi                         ; rdi -> start of the string
+        inc rsi                         ; rdi -> start of the string
         pop rcx                         ; restore rcx value 
 
         ret 
