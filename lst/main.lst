@@ -1,5 +1,5 @@
      1                                  ;================================================
-     2                                  ;                         (c) Rustam4ik, 2029 - 7
+     2                                  ;                        (c) Rustam4ik, 2029 - 7
      3                                  ;================================================
      4                                  
      5                                  section .text 
@@ -47,359 +47,377 @@
     47                                  ;==================Includes======================
     48                                  
     49                                  %include    "RsPrint.s"                      
-     1                              <1> ;====================PRINTF======================
+     1                              <1> ;====================MACRO=======================
      2                              <1> 
-     3                              <1> ; 'Printf' assembler function made for 
-     4                              <1> ;                         Linux x86_64
-     5                              <1> ;
-     6                              <1> ; File consists unit tests for functions
-     7                              <1> ; Includes STRLIB library 
+     3                              <1> ;-----------------.PROLOGUE----------------------
+     4                              <1> ;
+     5                              <1> ; Descr: pushes arguments in stack in normal order
+     6                              <1> ;
+     7                              <1> ;------------------------------------------------
      8                              <1> 
-     9                              <1> ; %s - '0'-terminated string
-    10                              <1> ; %c - symbol
-    11                              <1> ; %d - decimal
-    12                              <1> ; %x - hexidecimal
-    13                              <1> ; %o - octagonal
-    14                              <1> ; %b - binary
+     9                              <1> %macro  .PROLOGUE   1-*                 
+    10                              <1>                                         ; 1 and more args
+    11                              <1>     %rep %0                             
+    12                              <1> 
+    13                              <1>         push %1 
+    14                              <1>         %rotate 1
     15                              <1> 
-    16                              <1> ;   b   c   d   o   s   x
-    17                              <1> ;   2d  2d  3d  14d 18d 23d
-    18                              <1> ;   62h 63h 64h 6Fh 73h 78h
+    16                              <1>     %endrep 
+    17                              <1> 
+    18                              <1> %endmacro
     19                              <1> 
-    20                              <1> ;================================================
-    21                              <1> 
-    22                              <1> %ifndef rsPrint
-    23                              <1> %define rsPrint 
-    24                              <1> 
-    25                              <1> ;================================================
-    26                              <1> 
-    27                              <1> section .text 
-    28                              <1> 
-    29                              <1> ;==================FUNCTIONS=====================
-    30                              <1> 
-    31                              <1> ;-------------------RsPrint----------------------
-    32                              <1> ;
-    33                              <1> ; Descr: Prints string in terminal
-    34                              <1> ; Entry: Gains arguments in stack (CDECL)
-    35                              <1> ;        First arg  - format string
-    36                              <1> ;        Next  args - arguments for format string
-    37                              <1> ; Exit : None
-    38                              <1> ; Desrt: a lot
-    39                              <1> ;-------------------------------------------------
-    40                              <1> 
-    41                              <1> RsPrint:     
-    42 00000000 55                  <1>             push rbp
-    43 00000001 4889E5              <1>             mov rbp, rsp                ; make stack frame
+    20                              <1> ;------------------.EPILOGUE---------------------
+    21                              <1> ;
+    22                              <1> ; Descr: popes arguments from stack in reversed order
+    23                              <1> ;
+    24                              <1> ;------------------------------------------------
+    25                              <1> 
+    26                              <1> %macro .EPILOGUE   1-*
+    27                              <1> 
+    28                              <1>     %rep %0
+    29                              <1> 
+    30                              <1>         %rotate -1
+    31                              <1>         %pop %1
+    32                              <1> 
+    33                              <1>     %endrep 
+    34                              <1> 
+    35                              <1> %endmacro
+    36                              <1> 
+    37                              <1> ;====================PRINTF======================
+    38                              <1> 
+    39                              <1> ; 'Printf' assembler function made for 
+    40                              <1> ;                         Linux x86_64
+    41                              <1> ;
+    42                              <1> ; File consists unit tests for functions
+    43                              <1> ; Includes STRLIB library 
     44                              <1> 
-    45 00000004 488B7510            <1>             mov rsi, [rbp + 16]         ; rbp -> start of format string
-    46 00000008 488D5D18            <1>             lea rbx, [rbp + 24]         ; rbx -> first argument
-    47                              <1> 
-    48 0000000C 4831D2              <1>             xor rdx, rdx                ; counter of symbols 
-    49                              <1> 
-    50 0000000F BF01000000          <1>             mov rdi, 01h                ; stdout
+    45                              <1> ; %s - '0'-terminated string
+    46                              <1> ; %c - symbol
+    47                              <1> ; %d - decimal
+    48                              <1> ; %x - hexidecimal
+    49                              <1> ; %o - octagonal
+    50                              <1> ; %b - binary
     51                              <1> 
-    52                              <1>         .loop:
-    53 00000014 803C1600            <1>             cmp byte [rsi + rdx], 0     ; if there EOL
-    54 00000018 741F                <1>             je .fin
+    52                              <1> ;   b   c   d   o   s   x
+    53                              <1> ;   2d  2d  3d  14d 18d 23d
+    54                              <1> ;   62h 63h 64h 6Fh 73h 78h
     55                              <1> 
-    56 0000001A 803C1625            <1>             cmp byte [rsi + rdx], '%'   ; if there specifier
-    57 0000001E 7405                <1>             je .write 
-    58                              <1> 
-    59 00000020 48FFC2              <1>             inc rdx                     ; to next symbol
-    60 00000023 EBEF                <1>             jmp .loop 
-    61                              <1> 
-    62                              <1>         .write:  
-    63 00000025 4883FA00            <1>             cmp rdx, 0                  ; if counter == 0
-    64 00000029 7407                <1>             je .arg                     ; no need to write
-    65                              <1> 
-    66 0000002B B801000000          <1>             mov rax, 01h                ; 'write' syscall code
-    67 00000030 0F05                <1>             syscall                     ; else write
-    68                              <1> 
-    69                              <1>         .arg:
-    70 00000032 E811000000          <1>             call RsPrintArg             ; print argument
-    71 00000037 EBDB                <1>             jmp .loop 
-    72                              <1> 
-    73                              <1>         .fin:
-    74 00000039 4883FA00            <1>             cmp rdx, 0                  ; if counter == 0
-    75 0000003D 7407                <1>             je .ret                     ; no need to write 
+    56                              <1> ;================================================
+    57                              <1> 
+    58                              <1> %ifndef rsPrint
+    59                              <1> %define rsPrint 
+    60                              <1> 
+    61                              <1> ;================================================
+    62                              <1> 
+    63                              <1> section .text 
+    64                              <1> 
+    65                              <1> ;==================FUNCTIONS=====================
+    66                              <1> 
+    67                              <1> ;-------------------RsPrint----------------------
+    68                              <1> ;
+    69                              <1> ; Descr: Prints string in terminal
+    70                              <1> ; Entry: Gains arguments in stack (CDECL)
+    71                              <1> ;        First arg  - format string
+    72                              <1> ;        Next  args - arguments for format string
+    73                              <1> ; Exit : None
+    74                              <1> ; Desrt: a lot
+    75                              <1> ;-------------------------------------------------
     76                              <1> 
-    77 0000003F B801000000          <1>             mov rax, 01h                ; 'write' syscall code
-    78 00000044 0F05                <1>             syscall                     ; else write
-    79                              <1> 
-    80                              <1>         .ret: 
-    81 00000046 5D                  <1>             pop rbp                     ; restore rbp value
-    82 00000047 C3                  <1>             ret 
+    77                              <1> RsPrint:     
+    78 00000000 55                  <1>             push rbp
+    79 00000001 4889E5              <1>             mov rbp, rsp                ; make stack frame
+    80                              <1> 
+    81 00000004 488B7510            <1>             mov rsi, [rbp + 16]         ; rbp -> start of format string
+    82 00000008 488D5D18            <1>             lea rbx, [rbp + 24]         ; rbx -> first argument
     83                              <1> 
-    84                              <1> ;------------------RsPrintArg---------------------
-    85                              <1> ;
-    86                              <1> ; Descr: Prints in terminal argument in the way
-    87                              <1> ;        according to specifier
-    88                              <1> ;
-    89                              <1> ; Entry: RSI + RDX -> % 
-    90                              <1> ;        RBX -> next arg to be printed
-    91                              <1> ;        RAX == 1 (write)
-    92                              <1> ;        RDI == 1 (stdout)
-    93                              <1> ;
-    94                              <1> ; Exit : RDX == 0
-    95                              <1> ;        RSI -> next symb after specifier
-    96                              <1> ;
-    97                              <1> ; Destr:
-    98                              <1> ;------------------------------------------------
-    99                              <1> 
-   100                              <1> RsPrintArg:  
-   101 00000048 4801D6              <1>             add rsi, rdx                ; move rsi -> %    
-   102                              <1> 
-   103 0000004B 4C0FB64601          <1>             movzx r8, byte [rsi + 1]    
-   104                              <1>                                         ; get next symbol after '%'
-   105                              <1> 
-   106 00000050 4983F825            <1>             cmp r8, '%'
-   107 00000054 7511                <1>             jne .nodblpercent
+    84 0000000C 4831D2              <1>             xor rdx, rdx                ; counter of symbols 
+    85                              <1> 
+    86 0000000F BF01000000          <1>             mov rdi, 01h                ; stdout
+    87                              <1> 
+    88                              <1>         .loop:
+    89 00000014 803C1600            <1>             cmp byte [rsi + rdx], 0     ; if there EOL
+    90 00000018 741F                <1>             je .fin
+    91                              <1> 
+    92 0000001A 803C1625            <1>             cmp byte [rsi + rdx], '%'   ; if there specifier
+    93 0000001E 7405                <1>             je .write 
+    94                              <1> 
+    95 00000020 48FFC2              <1>             inc rdx                     ; to next symbol
+    96 00000023 EBEF                <1>             jmp .loop 
+    97                              <1> 
+    98                              <1>         .write:  
+    99 00000025 4883FA00            <1>             cmp rdx, 0                  ; if counter == 0
+   100 00000029 7407                <1>             je .arg                     ; no need to write
+   101                              <1> 
+   102 0000002B B801000000          <1>             mov rax, 01h                ; 'write' syscall code
+   103 00000030 0F05                <1>             syscall                     ; else write
+   104                              <1> 
+   105                              <1>         .arg:
+   106 00000032 E811000000          <1>             call RsPrintArg             ; print argument
+   107 00000037 EBDB                <1>             jmp .loop 
    108                              <1> 
-   109 00000056 B801000000          <1>             mov rax, 01d                ; 'write' syscall 
-   110 0000005B BA01000000          <1>             mov rdx, 01d                ; print one symb
-   111                              <1> 
-   112 00000060 0F05                <1>             syscall                     ; 'write' one %
-   113                              <1> 
-   114 00000062 E90E010000          <1>             jmp .fin 
+   109                              <1>         .fin:
+   110 00000039 4883FA00            <1>             cmp rdx, 0                  ; if counter == 0
+   111 0000003D 7407                <1>             je .ret                     ; no need to write 
+   112                              <1> 
+   113 0000003F B801000000          <1>             mov rax, 01h                ; 'write' syscall code
+   114 00000044 0F05                <1>             syscall                     ; else write
    115                              <1> 
-   116                              <1>         .nodblpercent:
-   117 00000067 4983E862            <1>             sub r8, 'b'                 ; r8 = offset of the symbol
-   118                              <1>                                         ; from 'b' in ASCII table
+   116                              <1>         .ret: 
+   117 00000046 5D                  <1>             pop rbp                     ; restore rbp value
+   118 00000047 C3                  <1>             ret 
    119                              <1> 
-   120 0000006B 4983F877            <1>             cmp r8, 'x' - 1             ; if specifier is not recognized
-   121 0000006F 0F87F4000000        <1>             ja .casedefault             ; print two symbol incuding '%'
-   122                              <1> 
-   123 00000075 4E8B04C5[80000000]  <1>             mov r8, [.jmptable + r8 * 8]
-   124 0000007D 41FFE0              <1>             jmp r8                      ; else jmp using table
-   125                              <1> 
-   126                              <1>         .jmptable: 
-   127 00000080 [3801000000000000]  <1>             dq .binary                  ; %b
-   128 00000088 [5401000000000000]  <1>             dq .char                    ; 1
-   129 00000090 [4D01000000000000]  <1>             dq .decimal                 ; 2
-   130 00000098 [6901000000000000]  <1>             dq .casedefault             ; 3
-   131 000000A0 [6901000000000000]  <1>             dq .casedefault             ; 4
-   132 000000A8 [6901000000000000]  <1>             dq .casedefault             ; 5
-   133 000000B0 [6901000000000000]  <1>             dq .casedefault             ; 6
-   134 000000B8 [6901000000000000]  <1>             dq .casedefault             ; 7
-   135 000000C0 [6901000000000000]  <1>             dq .casedefault             ; 8
-   136 000000C8 [6901000000000000]  <1>             dq .casedefault             ; 9
-   137 000000D0 [6901000000000000]  <1>             dq .casedefault             ; 10
-   138 000000D8 [6901000000000000]  <1>             dq .casedefault             ; 11
-   139 000000E0 [6901000000000000]  <1>             dq .casedefault             ; 12
-   140 000000E8 [3F01000000000000]  <1>             dq .octagonal               ; %o
-   141 000000F0 [6901000000000000]  <1>             dq .casedefault             ; 14
-   142 000000F8 [6901000000000000]  <1>             dq .casedefault             ; 15
-   143 00000100 [6901000000000000]  <1>             dq .casedefault             ; 16
-   144 00000108 [5B01000000000000]  <1>             dq .string                  ; %s
-   145 00000110 [6901000000000000]  <1>             dq .casedefault             ; 18
-   146 00000118 [6901000000000000]  <1>             dq .casedefault             ; 19
-   147 00000120 [6901000000000000]  <1>             dq .casedefault             ; 20
-   148 00000128 [6901000000000000]  <1>             dq .casedefault             ; 21
-   149 00000130 [4601000000000000]  <1>             dq .hexadecimal             ; %x
+   120                              <1> ;------------------RsPrintArg---------------------
+   121                              <1> ;
+   122                              <1> ; Descr: Prints in terminal argument in the way
+   123                              <1> ;        according to specifier
+   124                              <1> ;
+   125                              <1> ; Entry: RSI + RDX -> % 
+   126                              <1> ;        RBX -> next arg to be printed
+   127                              <1> ;        RAX == 1 (write)
+   128                              <1> ;        RDI == 1 (stdout)
+   129                              <1> ;
+   130                              <1> ; Exit : RDX == 0
+   131                              <1> ;        RSI -> next symb after specifier
+   132                              <1> ;
+   133                              <1> ; Destr:
+   134                              <1> ;------------------------------------------------
+   135                              <1> 
+   136                              <1> RsPrintArg:  
+   137 00000048 4801D6              <1>             add rsi, rdx                ; move rsi -> %  
+   138 0000004B 56                  <1>             push rsi                    ; save current pos in format string  
+   139                              <1> 
+   140 0000004C 4C0FB64601          <1>             movzx r8, byte [rsi + 1]    
+   141                              <1>                                         ; get next symbol after '%'
+   142                              <1> 
+   143 00000051 4983F825            <1>             cmp r8, '%'
+   144 00000055 7511                <1>             jne .nodblpercent           ; '%%' case 
+   145                              <1> 
+   146 00000057 B801000000          <1>             mov rax, 01d                ; 'write' syscall 
+   147 0000005C BA01000000          <1>             mov rdx, 01d                ; print one symb
+   148                              <1> 
+   149 00000061 0F05                <1>             syscall                     ; 'write' one %
    150                              <1> 
-   151                              <1>         .binary:
-   152 00000138 B901000000          <1>             mov rcx, 1
-   153 0000013D EB23                <1>             jmp .case2n
-   154                              <1> 
-   155                              <1>         .octagonal:
-   156 0000013F B903000000          <1>             mov rcx, 3
-   157 00000144 EB1C                <1>             jmp .case2n
-   158                              <1> 
-   159                              <1>         .hexadecimal:
-   160 00000146 B904000000          <1>             mov rcx, 4
-   161 0000014B EB15                <1>             jmp .case2n
+   151 00000063 E90E010000          <1>             jmp .fin 
+   152                              <1> 
+   153                              <1>         .nodblpercent:
+   154 00000068 4983E862            <1>             sub r8, 'b'                 ; r8 = offset of the symbol
+   155                              <1>                                         ; from 'b' in ASCII table
+   156                              <1> 
+   157 0000006C 4983F877            <1>             cmp r8, 'x' - 1             ; if specifier is not recognized
+   158 00000070 0F87F4000000        <1>             ja .casedefault             ; print two symbol incuding '%'
+   159                              <1> 
+   160 00000076 4E8B04C5[81000000]  <1>             mov r8, [.jmptable + r8 * 8]
+   161 0000007E 41FFE0              <1>             jmp r8                      ; else jmp using table
    162                              <1> 
-   163                              <1>         .decimal:
-   164 0000014D E82B000000          <1>             call RsPrintArgDec
-   165 00000152 EB21                <1>             jmp .fin
-   166                              <1> 
-   167                              <1>         .char: 
-   168 00000154 E88A000000          <1>             call RsPrintArgChar
-   169 00000159 EB1A                <1>             jmp .fin 
-   170                              <1> 
-   171                              <1>         .string:
-   172 0000015B E86A000000          <1>             call RsPrintArgStr
-   173 00000160 EB13                <1>             jmp .fin
-   174                              <1> 
-   175                              <1>         .case2n:
-   176 00000162 E83A000000          <1>             call RsPrintArg2n
-   177 00000167 EB0C                <1>             jmp .fin 
-   178                              <1> 
-   179                              <1>         .casedefault:
-   180 00000169 BA02000000          <1>             mov rdx, 2                  ; write "%%"
-   181 0000016E B801000000          <1>             mov rax, 01d                ; 'write' syscall 
-   182 00000173 0F05                <1>             syscall 
+   163                              <1>         .jmptable: 
+   164 00000081 [3901000000000000]  <1>             dq .binary                  ; %b
+   165 00000089 [5501000000000000]  <1>             dq .char                    ; %c
+   166 00000091 [4E01000000000000]  <1>             dq .decimal                 ; %d
+   167                              <1> 
+   168 00000099 [6A01000000000000]- <1>             times 'n' - 'd' dq .casedefault
+   168 00000099 <rept>              <1>
+   169                              <1> 
+   170 000000E9 [4001000000000000]  <1>             dq .octagonal               ; %o
+   171                              <1> 
+   172 000000F1 [6A01000000000000]- <1>             times 'r' - 'o' dq .casedefault
+   172 000000F1 <rept>              <1>
+   173                              <1> 
+   174 00000109 [5C01000000000000]  <1>             dq .string                  ; %s
+   175                              <1> 
+   176 00000111 [6A01000000000000]- <1>             times 'w' - 's' dq .casedefault
+   176 00000111 <rept>              <1>
+   177                              <1> 
+   178 00000131 [4701000000000000]  <1>             dq .hexadecimal             ; %x
+   179                              <1> 
+   180                              <1>         .binary:
+   181 00000139 B901000000          <1>             mov rcx, 1
+   182 0000013E EB23                <1>             jmp .case2n
    183                              <1> 
-   184                              <1>         .fin: 
-   185 00000175 4831D2              <1>             xor rdx, rdx                ; counter = 0
-   186 00000178 4883C602            <1>             add rsi, 2                  ; rsi -> next sym after specifier
-   187                              <1>             
-   188 0000017C C3                  <1>             ret 
-   189                              <1> 
-   190                              <1> ;------------------RsPrintArgDec-----------------
-   191                              <1> ;
-   192                              <1> ; Descr: Prints number in decimal numeric system
-   193                              <1> ;
-   194                              <1> ; Entry: RBX -> arguments
-   195                              <1> ;        RDI == 1 (stdout)
-   196                              <1> ;
-   197                              <1> ; Exit : RBX -> next arguments (+8)
-   198                              <1> ;
-   199                              <1> ; Destr: 
-   200                              <1> ;------------------------------------------------
-   201                              <1> 
-   202                              <1> RsPrintArgDec:
+   184                              <1>         .octagonal:
+   185 00000140 B903000000          <1>             mov rcx, 3
+   186 00000145 EB1C                <1>             jmp .case2n
+   187                              <1> 
+   188                              <1>         .hexadecimal:
+   189 00000147 B904000000          <1>             mov rcx, 4
+   190 0000014C EB15                <1>             jmp .case2n
+   191                              <1> 
+   192                              <1>         .decimal:
+   193 0000014E E82C000000          <1>             call RsPrintArgDec
+   194 00000153 EB21                <1>             jmp .fin
+   195                              <1> 
+   196                              <1>         .char: 
+   197 00000155 E885000000          <1>             call RsPrintArgChar
+   198 0000015A EB1A                <1>             jmp .fin 
+   199                              <1> 
+   200                              <1>         .string:
+   201 0000015C E867000000          <1>             call RsPrintArgStr
+   202 00000161 EB13                <1>             jmp .fin
    203                              <1> 
-   204 0000017D 56                  <1>             push rsi
-   205 0000017E 53                  <1>             push rbx                    ; saving current position in format string
-   206                              <1>                                         ; no need to save rdx
-   207                              <1>                                         ; save current argument position in stack (rbx) 
-   208                              <1> 
-   209 0000017F 488D3425[00000000]  <1>             lea rsi, [PrintArgBuf]      ; buffer for string
-   210 00000187 41B90A000000        <1>             mov r9, 10d                 ; base of numeric system
-   211 0000018D 488B1B              <1>             mov rbx, [rbx]              ; get argument value
+   204                              <1>         .case2n:
+   205 00000163 E839000000          <1>             call RsPrintArg2n
+   206 00000168 EB0C                <1>             jmp .fin 
+   207                              <1> 
+   208                              <1>         .casedefault:
+   209 0000016A BA02000000          <1>             mov rdx, 2                  ; write "%%"
+   210 0000016F B801000000          <1>             mov rax, 01d                ; 'write' syscall 
+   211 00000174 0F05                <1>             syscall 
    212                              <1> 
-   213 00000190 E879000000          <1>             call RsItoa                 ; now R8 = number of symbols in string 
-   214                              <1>                                         ; rsi remains it value 
-   215                              <1>                                         ; rdi still equals 1
-   216                              <1> 
-   217 00000195 E869000000          <1>             call RsWriteStr             ; call 'write'
-   218                              <1> 
-   219 0000019A 5B                  <1>             pop rbx 
-   220 0000019B 5E                  <1>             pop rsi                     ; restore values
-   221 0000019C 4883C308            <1>             add rbx, 8                  ; rbx -> next argument
-   222                              <1> 
-   223 000001A0 C3                  <1>             ret 
-   224                              <1> 
-   225                              <1> ;------------------RsPrintArg2n------------------
+   213                              <1>         .fin: 
+   214 00000176 4831D2              <1>             xor rdx, rdx                ; counter = 0
+   215 00000179 5E                  <1>             pop rsi                     ; restore rsi value 
+   216 0000017A 4883C602            <1>             add rsi, 2                  ; rsi -> next sym after specifier
+   217                              <1>             
+   218 0000017E C3                  <1>             ret 
+   219                              <1> 
+   220                              <1> ;------------------RsPrintArgDec-----------------
+   221                              <1> ;
+   222                              <1> ; Descr: Prints number in decimal numeric system
+   223                              <1> ;
+   224                              <1> ; Entry: RBX -> arguments
+   225                              <1> ;        RDI == 1 (stdout)
    226                              <1> ;
-   227                              <1> ; Descr: Print argument in numeric system with 
-   228                              <1> ;        base, that is a power of 2 (2 ^n)
-   229                              <1> ;
-   230                              <1> ; Entry: RCX == n
-   231                              <1> ;        RBX -> current argument
-   232                              <1> ;        RDI == 1(stdout)
-   233                              <1> ; Exit : RBX -> next argument (+8)
-   234                              <1> ;
-   235                              <1> ; Destr: RDX
-   236                              <1> ;------------------------------------------------
-   237                              <1> 
-   238                              <1> RsPrintArg2n:
-   239 000001A1 56                  <1>             push rsi
-   240 000001A2 53                  <1>             push rbx                    ; saving current position in format string
-   241                              <1>                                         ; no need to save rdx
-   242                              <1>                                         ; save current argument position in stack (rbx) 
+   227                              <1> ; Exit : RBX -> next arguments (+8)
+   228                              <1> ;
+   229                              <1> ; Destr: RSI, RDX, RAX 
+   230                              <1> ;------------------------------------------------
+   231                              <1> 
+   232                              <1> RsPrintArgDec:
+   233                              <1> 
+   234 0000017F 53                  <1>             push rbx                    ; save current argument position in stack (rbx) 
+   235                              <1> 
+   236 00000180 488D3425[00000000]  <1>             lea rsi, [PrintArgBuf]      ; buffer for string
+   237 00000188 41B90A000000        <1>             mov r9, 10d                 ; base of numeric system
+   238 0000018E 488B1B              <1>             mov rbx, [rbx]              ; get argument value
+   239                              <1> 
+   240 00000191 E872000000          <1>             call RsItoa                 ; now R8 = number of symbols in string 
+   241                              <1>                                         ; rsi remains it value 
+   242                              <1>                                         ; rdi still equals 1
    243                              <1> 
-   244 000001A3 488D3425[00000000]  <1>             lea rsi, [PrintArgBuf]      ; buffer for string
-   245 000001AB 488B1B              <1>             mov rbx, [rbx]              ; get argument value
-   246                              <1> 
-   247 000001AE BA01000000          <1>             mov rdx, 1
-   248 000001B3 48D3E2              <1>             shl rdx, cl
-   249 000001B6 48FFCA              <1>             dec rdx                     ; rdx = 2^n - 1 (mask)
+   244 00000196 E862000000          <1>             call RsWriteStr             ; call 'write'
+   245                              <1> 
+   246 0000019B 5B                  <1>             pop rbx                     ; restore values
+   247 0000019C 4883C308            <1>             add rbx, 8                  ; rbx -> next argument
+   248                              <1> 
+   249 000001A0 C3                  <1>             ret 
    250                              <1> 
-   251 000001B9 E88A000000          <1>             call RsItoa2n               ; get string in buffer
-   252                              <1>                                         ; rsi remains its value
-   253                              <1>                                         ; rdi still equals 1
-   254                              <1> 
-   255 000001BE E840000000          <1>             call RsWriteStr             ; call 'write'
-   256                              <1> 
-   257 000001C3 5B                  <1>             pop rbx 
-   258 000001C4 5E                  <1>             pop rsi                     ; restore values
-   259 000001C5 4883C308            <1>             add rbx, 8                  ; rbx -> next argument
-   260                              <1> 
-   261 000001C9 C3                  <1>             ret 
-   262                              <1> 
-   263                              <1> ;------------------RsPrintArgStr-----------------
-   264                              <1> ;
-   265                              <1> ; Descr: Writes string argument
-   266                              <1> ;
-   267                              <1> ; Entry: RDI == 1
-   268                              <1> ;        RBX -> current arguments ( address of string)
-   269                              <1> ;
-   270                              <1> ; Exit : RBX -> next argument (+8)
-   271                              <1> ;
-   272                              <1> ; Destr: RDX 
-   273                              <1> ;------------------------------------------------
-   274                              <1> 
-   275                              <1> RsPrintArgStr:
-   276 000001CA 56                  <1>             push rsi                    ; saving current position in format string
-   277                              <1>                                         ; no need to save rdx
-   278                              <1> 
-   279 000001CB 488B33              <1>             mov rsi, [rbx]              ; rsi -> argument string
-   280 000001CE E8AD000000          <1>             call RsStrlen               ; rcx = lenght of string
-   281                              <1> 
-   282 000001D3 4889CA              <1>             mov rdx, rcx                ; rdx = number of symbols
-   283 000001D6 B801000000          <1>             mov rax, 01d                ; now: rax == 1, rdi == 1
+   251                              <1> ;------------------RsPrintArg2n------------------
+   252                              <1> ;
+   253                              <1> ; Descr: Print argument in numeric system with 
+   254                              <1> ;        base, that is a power of 2 (2 ^n)
+   255                              <1> ;
+   256                              <1> ; Entry: RCX == n
+   257                              <1> ;        RBX -> current argument
+   258                              <1> ;        RDI == 1(stdout)
+   259                              <1> ; Exit : RBX -> next argument (+8)
+   260                              <1> ;
+   261                              <1> ; Destr: RDX, RAX 
+   262                              <1> ;------------------------------------------------
+   263                              <1> 
+   264                              <1> RsPrintArg2n:
+   265 000001A1 53                  <1>             push rbx                    ; save current argument position in stack (rbx) 
+   266                              <1> 
+   267 000001A2 488D3425[00000000]  <1>             lea rsi, [PrintArgBuf]      ; buffer for string
+   268 000001AA 488B1B              <1>             mov rbx, [rbx]              ; get argument value
+   269                              <1> 
+   270 000001AD BA01000000          <1>             mov rdx, 1
+   271 000001B2 48D3E2              <1>             shl rdx, cl
+   272 000001B5 48FFCA              <1>             dec rdx                     ; rdx = 2^n - 1 (mask)
+   273                              <1> 
+   274 000001B8 E885000000          <1>             call RsItoa2n               ; get string in buffer
+   275                              <1>                                         ; rsi remains its value
+   276                              <1>                                         ; rdi still equals 1
+   277                              <1> 
+   278 000001BD E83B000000          <1>             call RsWriteStr             ; call 'write'
+   279                              <1> 
+   280 000001C2 5B                  <1>             pop rbx 
+   281 000001C3 4883C308            <1>             add rbx, 8                  ; rbx -> next argument
+   282                              <1> 
+   283 000001C7 C3                  <1>             ret 
    284                              <1> 
-   285 000001DB 0F05                <1>             syscall                     ; call 'write'
-   286                              <1> 
-   287 000001DD 5E                  <1>             pop rsi                     ; restore value
-   288 000001DE 4883C308            <1>             add rbx, 8
-   289                              <1> 
-   290 000001E2 C3                  <1>             ret 
-   291                              <1> 
-   292                              <1> ;------------------RsPrintArgChar----------------
+   285                              <1> ;------------------RsPrintArgStr-----------------
+   286                              <1> ;
+   287                              <1> ; Descr: Writes string argument
+   288                              <1> ;
+   289                              <1> ; Entry: RDI == 1
+   290                              <1> ;        RBX -> current arguments ( address of string)
+   291                              <1> ;
+   292                              <1> ; Exit : RBX -> next argument (+8)
    293                              <1> ;
-   294                              <1> ; Descr: Writes char argument in terminal
-   295                              <1> ;
-   296                              <1> ; Entry: RDI == 1
-   297                              <1> ;        RBX -> current  argument
-   298                              <1> ;
-   299                              <1> ; Exit:  RBX -> next argument (+8)
-   300                              <1> ;
-   301                              <1> ; Destr: RDX
-   302                              <1> ;------------------------------------------------
+   294                              <1> ; Destr: RDX, RAX, RSI 
+   295                              <1> ;------------------------------------------------
+   296                              <1> 
+   297                              <1> RsPrintArgStr:
+   298 000001C8 488B33              <1>             mov rsi, [rbx]              ; rsi -> argument string
+   299 000001CB E8AA000000          <1>             call RsStrlen               ; rcx = lenght of string
+   300                              <1> 
+   301 000001D0 4889CA              <1>             mov rdx, rcx                ; rdx = number of symbols
+   302 000001D3 B801000000          <1>             mov rax, 01d                ; now: rax == 1, rdi == 1
    303                              <1> 
-   304                              <1> RsPrintArgChar:
-   305 000001E3 56                  <1>             push rsi                    ; saving current position in format string
-   306                              <1>                                         ; no need to save rdx
+   304 000001D8 0F05                <1>             syscall                     ; call 'write'
+   305                              <1> 
+   306 000001DA 4883C308            <1>             add rbx, 8
    307                              <1> 
-   308 000001E4 41B801000000        <1>             mov r8, 01d                 ; one symbol
-   309 000001EA 488D3425[00000000]  <1>             lea rsi, [PrintArgBuf]      ; buffer for argument
-   310                              <1> 
-   311 000001F2 488B13              <1>             mov rdx, [rbx]              ; get argument
-   312 000001F5 488916              <1>             mov [rsi], rdx              ; store char in buffer
-   313                              <1> 
-   314 000001F8 E806000000          <1>             call RsWriteStr             ; call 'write'
-   315                              <1> 
-   316 000001FD 5E                  <1>             pop rsi 
-   317 000001FE 4883C308            <1>             add rbx, 8                  ; rbx -> next argument
-   318                              <1> 
-   319 00000202 C3                  <1>             ret 
-   320                              <1>             
+   308 000001DE C3                  <1>             ret 
+   309                              <1> 
+   310                              <1> ;------------------RsPrintArgChar----------------
+   311                              <1> ;
+   312                              <1> ; Descr: Writes char argument in terminal
+   313                              <1> ;
+   314                              <1> ; Entry: RDI == 1
+   315                              <1> ;        RBX -> current  argument
+   316                              <1> ;
+   317                              <1> ; Exit:  RBX -> next argument (+8)
+   318                              <1> ;
+   319                              <1> ; Destr: RDX, RAX, RSI 
+   320                              <1> ;------------------------------------------------
    321                              <1> 
-   322                              <1> ;-------------------RsWriteStr-------------------
-   323                              <1> ;
-   324                              <1> ; Descr: writes particular number of symbols in 
-   325                              <1> ;        terminal using 'write' Linux system call 
-   326                              <1> ;
-   327                              <1> ; Entry: R8 - number of synbols to be printed
-   328                              <1> ;        RSI - start of the string
-   329                              <1> ;        RDI == 1 (stdout)
-   330                              <1> ;
-   331                              <1> ; Exit:  RAX == 1
-   332                              <1> ;
-   333                              <1> ; Destr: RDX
-   334                              <1> ;------------------------------------------------
+   322                              <1> RsPrintArgChar:
+   323 000001DF 41B801000000        <1>             mov r8, 01d                 ; one symbol
+   324 000001E5 488D3425[00000000]  <1>             lea rsi, [PrintArgBuf]      ; buffer for argument
+   325                              <1> 
+   326 000001ED 488B13              <1>             mov rdx, [rbx]              ; get argument
+   327 000001F0 488916              <1>             mov [rsi], rdx              ; store char in buffer
+   328                              <1> 
+   329 000001F3 E805000000          <1>             call RsWriteStr             ; call 'write'
+   330                              <1> 
+   331 000001F8 4883C308            <1>             add rbx, 8                  ; rbx -> next argument
+   332                              <1> 
+   333 000001FC C3                  <1>             ret 
+   334                              <1>             
    335                              <1> 
-   336                              <1> RsWriteStr:
-   337                              <1> 
-   338 00000203 4C89C2              <1>         mov rdx, r8                     ; rdx = number of symbols
-   339 00000206 B801000000          <1>         mov rax, 01d                    ; 'write' syscall
-   340                              <1> 
-   341 0000020B 0F05                <1>         syscall                         ; call write
-   342                              <1> 
-   343 0000020D C3                  <1>         ret 
-   344                              <1> 
-   345                              <1> ;------------------------------------------------
-   346                              <1> 
-   347                              <1> section .bss  
-   348                              <1> 
-   349 00000000 <res 00000040>      <1> PrintArgBuf: resb 64                 ; buffer used for itoa
-   350                              <1> 
-   351                              <1> ;================================================
-   352                              <1> 
-   353                              <1> %endif
+   336                              <1> ;-------------------RsWriteStr-------------------
+   337                              <1> ;
+   338                              <1> ; Descr: writes particular number of symbols in 
+   339                              <1> ;        terminal using 'write' Linux system call 
+   340                              <1> ;
+   341                              <1> ; Entry: R8 - number of synbols to be printed
+   342                              <1> ;        RSI - start of the string
+   343                              <1> ;        RDI == 1 (stdout)
+   344                              <1> ;
+   345                              <1> ; Exit:  none 
+   346                              <1> ;
+   347                              <1> ; Destr: RDX, RAX 
+   348                              <1> ;------------------------------------------------
+   349                              <1> 
+   350                              <1> RsWriteStr:
+   351 000001FD 4C89C2              <1>         mov rdx, r8                     ; rdx = number of symbols
+   352 00000200 B801000000          <1>         mov rax, 01d                    ; 'write' syscall
+   353                              <1> 
+   354 00000205 0F05                <1>         syscall                         ; call write
+   355                              <1> 
+   356 00000207 C3                  <1>         ret 
+   357                              <1> 
+   358                              <1> ;------------------------------------------------
+   359                              <1> 
+   360                              <1> [section .bss]  
+   361                              <1> 
+   362 00000000 <res 00000040>      <1> PrintArgBuf: resb 64                 ; buffer used for itoa
+   363                              <1> 
+   364                              <1> __SECT__
+   365                              <1> 
+   366                              <1> ;================================================
+   367                              <1> 
+   368                              <1> %endif
     50                                                                          ; printf function
     51                                  %include    "RsItoa.s"           
      1                              <1> %ifndef rsItoa
@@ -411,7 +429,7 @@
      7                              <1> 
      8                              <1> ;==================FUNCTIONS=====================
      9                              <1> 
-    10                              <1> ;-------------------MyItoa-------------------------
+    10                              <1> ;-------------------RsItoa-------------------------
     11                              <1> ;
     12                              <1> ; Descr: translates number to string of symbols
     13                              <1> ;
@@ -426,38 +444,38 @@
     22                              <1> ;------------------------------------------------
     23                              <1> 
     24                              <1> RsItoa:
-    25 0000020E 4889D8              <1>         mov rax, rbx                    ; get value for
+    25 00000208 4889D8              <1>         mov rax, rbx                    ; get value for
     26                              <1>                                         ; counting offset
-    27 00000211 41B801000000        <1>         mov r8, 1                       ; at least ine symb in string
+    27 0000020B 41B801000000        <1>         mov r8, 1                       ; at least ine symb in string
     28                              <1> 
     29                              <1>     .CountOffset:
-    30 00000217 4831D2              <1>         xor rdx, rdx                    ; rdx:rax / op64 = rax, rdx = remainder 
-    31 0000021A 49F7F1              <1>         div r9                          ; div by base
+    30 00000211 4831D2              <1>         xor rdx, rdx                    ; rdx:rax / op64 = rax, rdx = remainder 
+    31 00000214 49F7F1              <1>         div r9                          ; div by base
     32                              <1> 
-    33 0000021D 4883F800            <1>         cmp rax, 0                      ; cmp result with 0
-    34 00000221 7408                <1>         je .main                        ; if equal, jmp to main 
-    35 00000223 49FFC0              <1>         inc r8                          ; increment addition counter
-    36 00000226 48FFC6              <1>         inc rsi                         ; move to next symbol
+    33 00000217 4883F800            <1>         cmp rax, 0                      ; cmp result with 0
+    34 0000021B 7408                <1>         je .main                        ; if equal, jmp to main 
+    35 0000021D 49FFC0              <1>         inc r8                          ; increment addition counter
+    36 00000220 48FFC6              <1>         inc rsi                         ; move to next symbol
     37                              <1> 
-    38 00000229 EBEC                <1>         jmp .CountOffset
+    38 00000223 EBEC                <1>         jmp .CountOffset
     39                              <1> 
     40                              <1>     .main:
-    41 0000022B 4889D8              <1>         mov rax, rbx                    ; get value again
-    42 0000022E 4C89C1              <1>         mov rcx, r8                     ; get number of symbols
+    41 00000225 4889D8              <1>         mov rax, rbx                    ; get value again
+    42 00000228 4C89C1              <1>         mov rcx, r8                     ; get number of symbols
     43                              <1> 
     44                              <1>     .loop:
-    45 00000231 4831D2              <1>         xor rdx, rdx                    ; for division
-    46 00000234 49F7F1              <1>         div r9                          ; divide by base 
+    45 0000022B 4831D2              <1>         xor rdx, rdx                    ; for division
+    46 0000022E 49F7F1              <1>         div r9                          ; divide by base 
     47                              <1> 
-    48 00000237 8A92[01000000]      <1>         mov dl, [rdx + XlatTable64]     ; converting symbol
+    48 00000231 8A92[01000000]      <1>         mov dl, [rdx + XlatTable64]     ; converting symbol
     49                              <1> 
-    50 0000023D 8816                <1>         mov [rsi], dl                   ; place symbol in string
-    51 0000023F 48FFCE              <1>         dec rsi                         ; iterate to next one
+    50 00000237 8816                <1>         mov [rsi], dl                   ; place symbol in string
+    51 00000239 48FFCE              <1>         dec rsi                         ; iterate to next one
     52                              <1> 
-    53 00000242 E2ED                <1>         loop .loop                      ; repeat rcx times
+    53 0000023C E2ED                <1>         loop .loop                      ; repeat rcx times
     54                              <1> 
-    55 00000244 48FFC6              <1>         inc rsi                         ; di point to the start of string
-    56 00000247 C3                  <1>         ret 
+    55 0000023E 48FFC6              <1>         inc rsi                         ; di point to the start of string
+    56 00000241 C3                  <1>         ret 
     57                              <1> 
     58                              <1> ;--------------------RsItoa2n--------------------
     59                              <1> ;
@@ -477,46 +495,48 @@
     73                              <1> 
     74                              <1> RsItoa2n:
     75                              <1> 
-    76 00000248 4889D8              <1>         mov rax, rbx                    ; get value for
+    76 00000242 4889D8              <1>         mov rax, rbx                    ; get value for
     77                              <1>                                         ; counting offset
-    78 0000024B 41B801000000        <1>         mov r8, 1                       ; at least ine symb in string
+    78 00000245 41B801000000        <1>         mov r8, 1                       ; at least ine symb in string
     79                              <1> 
     80                              <1>     .CountOffset:
-    81 00000251 48D3E8              <1>         shr rax, cl 
-    82 00000254 4883F800            <1>         cmp rax, 0
-    83 00000258 7408                <1>         je .loop 
+    81 0000024B 48D3E8              <1>         shr rax, cl 
+    82 0000024E 4883F800            <1>         cmp rax, 0
+    83 00000252 7408                <1>         je .loop 
     84                              <1> 
-    85 0000025A 49FFC0              <1>         inc r8                          ; increment addition counter
-    86 0000025D 48FFC6              <1>         inc rsi                         ; move to next symbol
+    85 00000254 49FFC0              <1>         inc r8                          ; increment addition counter
+    86 00000257 48FFC6              <1>         inc rsi                         ; move to next symbol
     87                              <1> 
-    88 00000260 EBEF                <1>         jmp .CountOffset
+    88 0000025A EBEF                <1>         jmp .CountOffset
     89                              <1> 
     90                              <1>     .loop:
-    91 00000262 4889D8              <1>         mov rax, rbx                    ; get value 
-    92 00000265 4821D0              <1>         and rax, rdx                    ; use mask
+    91 0000025C 4889D8              <1>         mov rax, rbx                    ; get value 
+    92 0000025F 4821D0              <1>         and rax, rdx                    ; use mask
     93                              <1> 
-    94 00000268 8A80[01000000]      <1>         mov al, [rax + XlatTable64]     ; translate code
-    95 0000026E 8806                <1>         mov [rsi], al                   ; store in sting
-    96 00000270 48FFCE              <1>         dec rsi                         ; iterate to next
+    94 00000262 8A80[01000000]      <1>         mov al, [rax + XlatTable64]     ; translate code
+    95 00000268 8806                <1>         mov [rsi], al                   ; store in sting
+    96 0000026A 48FFCE              <1>         dec rsi                         ; iterate to next
     97                              <1> 
-    98 00000273 48D3EB              <1>         shr rbx, cl                   ; ax /= 2^base
+    98 0000026D 48D3EB              <1>         shr rbx, cl                   ; ax /= 2^base
     99                              <1> 
-   100 00000276 4883FB00            <1>         cmp rbx, 0                      
-   101 0000027A 75E6                <1>         jne .loop                       ; while (rax != 0)
+   100 00000270 4883FB00            <1>         cmp rbx, 0                      
+   101 00000274 75E6                <1>         jne .loop                       ; while (rax != 0)
    102                              <1> 
-   103 0000027C 48FFC6              <1>         inc rsi                         ; rdi -> start of the string
-   104 0000027F C3                  <1>         ret 
+   103 00000276 48FFC6              <1>         inc rsi                         ; rdi -> start of the string
+   104 00000279 C3                  <1>         ret 
    105                              <1> 
    106                              <1> ;------------------------------------------------
    107                              <1> 
-   108                              <1> section .data 
+   108                              <1> [section .data] 
    109                              <1> 
    110 00000001 303132333435363738- <1> XlatTable64 db "0123456789ABCDEF"       ; translation table
    110 0000000A 39414243444546      <1>
    111                              <1> 
-   112                              <1> ;================================================
+   112                              <1> __SECT__
    113                              <1> 
-   114                              <1> %endif
+   114                              <1> ;================================================
+   115                              <1> 
+   116                              <1> %endif
     52                                                                          ; itoa function
     53                                  
     54                                  %include    "RsStrlen.s"                     
@@ -541,25 +561,25 @@
     19                              <1> ;-------------------------------------------------
     20                              <1> 
     21                              <1> RsStrlen:    
-    22 00000280 56                  <1>             push rsi                    ; save rsi value
+    22 0000027A 56                  <1>             push rsi                    ; save rsi value
     23                              <1> 
-    24 00000281 4831C9              <1>             xor rcx, rcx
-    25 00000284 48F7D9              <1>             neg rcx                     ; rcx == 0xFFFFFFFFFFFFFFFF
+    24 0000027B 4831C9              <1>             xor rcx, rcx
+    25 0000027E 48F7D9              <1>             neg rcx                     ; rcx == 0xFFFFFFFFFFFFFFFF
     26                              <1>             
     27                              <1>         .loop:
-    28 00000287 803E00              <1>             cmp byte [rsi], 0
-    29 0000028A 7405                <1>             je .ret                     ; if ([rdi] == 0) stop
+    28 00000281 803E00              <1>             cmp byte [rsi], 0
+    29 00000284 7405                <1>             je .ret                     ; if ([rdi] == 0) stop
     30                              <1> 
-    31 0000028C 48FFC6              <1>             inc rsi                     ; iterate to next symb
-    32 0000028F E2F6                <1>             loop .loop                  ; while ([di] != 0)
+    31 00000286 48FFC6              <1>             inc rsi                     ; iterate to next symb
+    32 00000289 E2F6                <1>             loop .loop                  ; while ([di] != 0)
     33                              <1> 
     34                              <1>         .ret: 
     35                              <1>             ;add rcx, 2                   ; get lenght of the string
-    36 00000291 48F7D9              <1>             neg rcx      
+    36 0000028B 48F7D9              <1>             neg rcx      
     37                              <1> 
-    38 00000294 5E                  <1>             pop rsi                     ; restore rsi value 
+    38 0000028E 5E                  <1>             pop rsi                     ; restore rsi value 
     39                              <1> 
-    40 00000295 C3                  <1>             ret 
+    40 0000028F C3                  <1>             ret 
     41                              <1> 
     42                              <1> ;================================================
     43                              <1> 
@@ -589,14 +609,14 @@
     20                              <1> 
     21                              <1> CharUnitTest:
     22                              <1> 
-    23 00000296 6A21                <1>         push '!'
-    24 00000298 68[4B000000]        <1>         push CharFormatStr              ; push arguments
+    23 00000290 6A21                <1>         push '!'
+    24 00000292 68[4B000000]        <1>         push CharFormatStr              ; push arguments
     25                              <1> 
-    26 0000029D E85EFDFFFF          <1>         call RsPrint
+    26 00000297 E864FDFFFF          <1>         call RsPrint
     27                              <1> 
-    28 000002A2 4883C410            <1>         add rsp, 16                     
+    28 0000029C 4883C410            <1>         add rsp, 16                     
     29                              <1> 
-    30 000002A6 C3                  <1>         ret 
+    30 000002A0 C3                  <1>         ret 
     31                              <1> 
     32                              <1> ;-----------------StrUnitTest--------------------
     33                              <1> ;
@@ -611,251 +631,251 @@
     42                              <1> 
     43                              <1> StrUnitTest:
     44                              <1> 
-    45 000002A7 68[11000000]        <1>         push StrArgument
-    46 000002AC 68[71000000]        <1>         push StrFormatStr
+    45 000002A1 68[11000000]        <1>         push StrArgument
+    46 000002A6 68[71000000]        <1>         push StrFormatStr
     47                              <1> 
-    48 000002B1 E84AFDFFFF          <1>         call RsPrint
+    48 000002AB E850FDFFFF          <1>         call RsPrint
     49                              <1> 
-    50 000002B6 4883C410            <1>         add rsp, 16
+    50 000002B0 4883C410            <1>         add rsp, 16
     51                              <1> 
-    52 000002BA C3                  <1>         ret 
+    52 000002B4 C3                  <1>         ret 
     53                              <1> 
-    54                              <1> section .data 
-    55                              <1> 
-    56 00000011 52757374616D00      <1> StrArgument db "Rustam", 0
+    54                              <1> [section .data] 
+    55 00000011 52757374616D00      <1> StrArgument db "Rustam", 0
+    56                              <1> __SECT__ 
     57                              <1> 
-    58                              <1> section .text 
-    59                              <1> 
-    60                              <1> ;-----------------DecUnitTest--------------------
+    58                              <1> ;-----------------DecUnitTest--------------------
+    59                              <1> ;
+    60                              <1> ; Descr: tests '%d' specifier
     61                              <1> ;
-    62                              <1> ; Descr: tests '%d' specifier
+    62                              <1> ; Entry: none
     63                              <1> ;
-    64                              <1> ; Entry: none
+    64                              <1> ; Exit : none
     65                              <1> ;
-    66                              <1> ; Exit : none
-    67                              <1> ;
-    68                              <1> ; Destr:
-    69                              <1> ;------------------------------------------------
+    66                              <1> ; Destr:
+    67                              <1> ;------------------------------------------------
+    68                              <1> 
+    69                              <1> DecUnitTest:
     70                              <1> 
-    71                              <1> DecUnitTest:
-    72                              <1> 
-    73 000002BB 68E8040000          <1>         push 1256d
-    74 000002C0 68[B6000000]        <1>         push DecFormatStr
+    71 000002B5 68E8040000          <1>         push 1256d
+    72 000002BA 68[B6000000]        <1>         push DecFormatStr
+    73                              <1> 
+    74 000002BF E83CFDFFFF          <1>         call RsPrint
     75                              <1> 
-    76 000002C5 E836FDFFFF          <1>         call RsPrint
+    76 000002C4 4883C410            <1>         add rsp, 16 
     77                              <1> 
-    78 000002CA 4883C410            <1>         add rsp, 16 
+    78 000002C8 C3                  <1>         ret 
     79                              <1> 
-    80 000002CE C3                  <1>         ret 
-    81                              <1> 
-    82                              <1> ;-----------------OctUnitTest--------------------
+    80                              <1> ;-----------------OctUnitTest--------------------
+    81                              <1> ;
+    82                              <1> ; Descr: tests '%o' specifier
     83                              <1> ;
-    84                              <1> ; Descr: tests '%o' specifier
+    84                              <1> ; Entry: none
     85                              <1> ;
-    86                              <1> ; Entry: none
+    86                              <1> ; Exit : none
     87                              <1> ;
-    88                              <1> ; Exit : none
-    89                              <1> ;
-    90                              <1> ; Destr:
-    91                              <1> ;------------------------------------------------
+    88                              <1> ; Destr:
+    89                              <1> ;------------------------------------------------
+    90                              <1> 
+    91                              <1> OctUnitTest:
     92                              <1> 
-    93                              <1> OctUnitTest:
-    94                              <1> 
-    95 000002CF 6A18                <1>         push 24d
-    96 000002D1 68[D5000000]        <1>         push OctFormatStr
+    93 000002C9 6A18                <1>         push 24d
+    94 000002CB 68[D5000000]        <1>         push OctFormatStr
+    95                              <1> 
+    96 000002D0 E82BFDFFFF          <1>         call RsPrint
     97                              <1> 
-    98 000002D6 E825FDFFFF          <1>         call RsPrint
-    99                              <1> 
-   100 000002DB 4883C410            <1>         add rsp, 16
-   101                              <1>         
-   102 000002DF C3                  <1>         ret
-   103                              <1> ;-----------------HexUnitTest--------------------
+    98 000002D5 4883C410            <1>         add rsp, 16
+    99                              <1>         
+   100 000002D9 C3                  <1>         ret
+   101                              <1> ;-----------------HexUnitTest--------------------
+   102                              <1> ;
+   103                              <1> ; Descr: tests '%x' specifier
    104                              <1> ;
-   105                              <1> ; Descr: tests '%x' specifier
+   105                              <1> ; Entry: none
    106                              <1> ;
-   107                              <1> ; Entry: none
+   107                              <1> ; Exit : none
    108                              <1> ;
-   109                              <1> ; Exit : none
-   110                              <1> ;
-   111                              <1> ; Destr:
-   112                              <1> ;------------------------------------------------
+   109                              <1> ; Destr:
+   110                              <1> ;------------------------------------------------
+   111                              <1> 
+   112                              <1> HexUnitTest:
    113                              <1> 
-   114                              <1> HexUnitTest:
-   115                              <1> 
-   116 000002E0 685AF22500          <1>         push 25f25Ah
-   117 000002E5 68[F2000000]        <1>         push HexFormatStr
-   118                              <1>         
-   119 000002EA E811FDFFFF          <1>         call RsPrint
+   114 000002DA 685AF22500          <1>         push 25f25Ah
+   115 000002DF 68[F2000000]        <1>         push HexFormatStr
+   116                              <1>         
+   117 000002E4 E817FDFFFF          <1>         call RsPrint
+   118                              <1> 
+   119 000002E9 4883C410            <1>         add rsp, 16
    120                              <1> 
-   121 000002EF 4883C410            <1>         add rsp, 16
-   122                              <1> 
-   123 000002F3 C3                  <1>         ret 
-   124                              <1> ;-----------------BinUnitTest--------------------
+   121 000002ED C3                  <1>         ret 
+   122                              <1> ;-----------------BinUnitTest--------------------
+   123                              <1> ;
+   124                              <1> ; Descr: tests '%b' specifier
    125                              <1> ;
-   126                              <1> ; Descr: tests '%b' specifier
+   126                              <1> ; Entry: none
    127                              <1> ;
-   128                              <1> ; Entry: none
+   128                              <1> ; Exit : none
    129                              <1> ;
-   130                              <1> ; Exit : none
-   131                              <1> ;
-   132                              <1> ; Destr:
-   133                              <1> ;------------------------------------------------
+   130                              <1> ; Destr:
+   131                              <1> ;------------------------------------------------
+   132                              <1> 
+   133                              <1> BinUnitTest:
    134                              <1> 
-   135                              <1> BinUnitTest:
-   136                              <1> 
-   137 000002F4 6A5B                <1>         push 1011011b
-   138 000002F6 68[94000000]        <1>         push BinFormatStr
+   135 000002EE 6A5B                <1>         push 1011011b
+   136 000002F0 68[94000000]        <1>         push BinFormatStr
+   137                              <1> 
+   138 000002F5 E806FDFFFF          <1>         call RsPrint
    139                              <1> 
-   140 000002FB E800FDFFFF          <1>         call RsPrint
+   140 000002FA 4883C410            <1>         add rsp, 16
    141                              <1> 
-   142 00000300 4883C410            <1>         add rsp, 16
+   142 000002FE C3                  <1>         ret 
    143                              <1> 
-   144 00000304 C3                  <1>         ret 
-   145                              <1> 
-   146                              <1> ;-----------------PercUnitTest-------------------
+   144                              <1> ;-----------------PercUnitTest-------------------
+   145                              <1> ;
+   146                              <1> ; Descr: tests '%%' specifier
    147                              <1> ;
-   148                              <1> ; Descr: tests '%%' specifier
+   148                              <1> ; Entry: none
    149                              <1> ;
-   150                              <1> ; Entry: none
+   150                              <1> ; Exit : none 
    151                              <1> ;
-   152                              <1> ; Exit : none 
-   153                              <1> ;
-   154                              <1> ; Destr:
-   155                              <1> ;------------------------------------------------
+   152                              <1> ; Destr:
+   153                              <1> ;------------------------------------------------
+   154                              <1> 
+   155                              <1> PercUnitTest:
    156                              <1> 
-   157                              <1> PercUnitTest:
+   157 000002FF 68[18000000]        <1>         push PercFormatStr
    158                              <1> 
-   159 00000305 68[18000000]        <1>         push PercFormatStr
+   159 00000304 E8F7FCFFFF          <1>         call RsPrint
    160                              <1> 
-   161 0000030A E8F1FCFFFF          <1>         call RsPrint
+   161 00000309 4883C408            <1>         add rsp, 8
    162                              <1> 
-   163 0000030F 4883C408            <1>         add rsp, 8
+   163 0000030D C3                  <1>         ret 
    164                              <1> 
-   165 00000313 C3                  <1>         ret 
-   166                              <1> 
-   167                              <1> ;-----------------DefUnitTest--------------------
+   165                              <1> ;-----------------DefUnitTest--------------------
+   166                              <1> ;
+   167                              <1> ; Descr: tests default case ( %f, %1 and etc)
    168                              <1> ;
-   169                              <1> ; Descr: tests default case ( %f, %1 and etc)
+   169                              <1> ; Entry: none
    170                              <1> ;
-   171                              <1> ; Entry: none
+   171                              <1> ; Exit : none 
    172                              <1> ;
-   173                              <1> ; Exit : none 
-   174                              <1> ;
-   175                              <1> ; Destr:
-   176                              <1> ;------------------------------------------------
+   173                              <1> ; Destr:
+   174                              <1> ;------------------------------------------------
+   175                              <1> 
+   176                              <1> DefUnitTest:
    177                              <1> 
-   178                              <1> DefUnitTest:
+   178 0000030E 68[2B000000]        <1>         push DefFormatStr
    179                              <1> 
-   180 00000314 68[2B000000]        <1>         push DefFormatStr
+   180 00000313 E8E8FCFFFF          <1>         call RsPrint
    181                              <1> 
-   182 00000319 E8E2FCFFFF          <1>         call RsPrint
+   182 00000318 6683C408            <1>         add sp, 8
    183                              <1> 
-   184 0000031E 6683C408            <1>         add sp, 8
+   184 0000031C C3                  <1>         ret 
    185                              <1> 
-   186 00000322 C3                  <1>         ret 
-   187                              <1> 
-   188                              <1> ;-----------------ComplexUnitTest----------------
-   189                              <1> ;
-   190                              <1> ; Descr: tests different specifiers in one format
-   191                              <1> ;        string
+   186                              <1> ;-----------------ComplexUnitTest----------------
+   187                              <1> ;
+   188                              <1> ; Descr: tests different specifiers in one format
+   189                              <1> ;        string
+   190                              <1> ;
+   191                              <1> ; Entry: none
    192                              <1> ;
-   193                              <1> ; Entry: none
+   193                              <1> ; Exit : none 
    194                              <1> ;
-   195                              <1> ; Exit : none 
-   196                              <1> ;
-   197                              <1> ; Destr:
-   198                              <1> ;------------------------------------------------
+   195                              <1> ; Destr:
+   196                              <1> ;------------------------------------------------
+   197                              <1> 
+   198                              <1> ComplexUnitTest:
    199                              <1> 
-   200                              <1> ComplexUnitTest:
-   201                              <1> 
-   202 00000323 68AB250000          <1>         push 25ABh
-   203 00000328 6A18                <1>         push 24d 
-   204 0000032A 68B3000000          <1>         push 10110011b
-   205 0000032F 68FFE80300          <1>         push 256255d
-   206 00000334 6A21                <1>         push '!'
-   207 00000336 68[11000000]        <1>         push StrArgument
-   208 0000033B 68[0B010000]        <1>         push ComplexFormatStr
+   200 0000031D 68AB250000          <1>         push 25ABh
+   201 00000322 6A18                <1>         push 24d 
+   202 00000324 68B3000000          <1>         push 10110011b
+   203 00000329 68FFE80300          <1>         push 256255d
+   204 0000032E 6A21                <1>         push '!'
+   205 00000330 68[11000000]        <1>         push StrArgument
+   206 00000335 68[0B010000]        <1>         push ComplexFormatStr
+   207                              <1> 
+   208 0000033A E8C1FCFFFF          <1>         call RsPrint
    209                              <1> 
-   210 00000340 E8BBFCFFFF          <1>         call RsPrint
+   210 0000033F 4883C438            <1>         add rsp, 56
    211                              <1> 
-   212 00000345 4883C438            <1>         add rsp, 56
+   212 00000343 C3                  <1>         ret 
    213                              <1> 
-   214 00000349 C3                  <1>         ret 
+   214                              <1> ;================================================
    215                              <1> 
-   216                              <1> ;================================================
+   216                              <1> [section .data] 
    217                              <1> 
-   218                              <1> section .data 
+   218                              <1> ;------------------------------------------------
    219                              <1> 
-   220                              <1> ;------------------------------------------------
+   220 00000018 54657374696E672025- <1> PercFormatStr:  db "Testing %%%% : %%", 0Ah, 0
+   220 00000021 252525203A2025250A- <1>
+   220 0000002A 00                  <1>
    221                              <1> 
-   222 00000018 54657374696E672025- <1> PercFormatStr:  db "Testing %%%% : %%", 0Ah, 0
-   222 00000021 252525203A2025250A- <1>
-   222 0000002A 00                  <1>
+   222                              <1> ;------------------------------------------------
    223                              <1> 
-   224                              <1> ;------------------------------------------------
+   224 0000002B 54657374696E672064- <1> DefFormatStr:   db "Testing default case: %a %1 %$", 0Ah, 0
+   224 00000034 656661756C74206361- <1>
+   224 0000003D 73653A202561202531- <1>
+   224 00000046 2025240A00          <1>
    225                              <1> 
-   226 0000002B 54657374696E672064- <1> DefFormatStr:   db "Testing default case: %a %1 %$", 0Ah, 0
-   226 00000034 656661756C74206361- <1>
-   226 0000003D 73653A202561202531- <1>
-   226 00000046 2025240A00          <1>
+   226                              <1> ;------------------------------------------------
    227                              <1> 
-   228                              <1> ;------------------------------------------------
+   228 0000004B 54657374696E672025- <1> CharFormatStr:  db "Testing %%c: printing symbol ! -  %c", 0Ah, 0
+   228 00000054 25633A207072696E74- <1>
+   228 0000005D 696E672073796D626F- <1>
+   228 00000066 6C2021202D20202563- <1>
+   228 0000006F 0A00                <1>
    229                              <1> 
-   230 0000004B 54657374696E672025- <1> CharFormatStr:  db "Testing %%c: printing symbol ! -  %c", 0Ah, 0
-   230 00000054 25633A207072696E74- <1>
-   230 0000005D 696E672073796D626F- <1>
-   230 00000066 6C2021202D20202563- <1>
-   230 0000006F 0A00                <1>
+   230                              <1> ;------------------------------------------------
    231                              <1> 
-   232                              <1> ;------------------------------------------------
+   232 00000071 54657374696E672025- <1> StrFormatStr:   db "Testing %%s: string 'Rustam' - %s", 0Ah, 0
+   232 0000007A 25733A20737472696E- <1>
+   232 00000083 67202752757374616D- <1>
+   232 0000008C 27202D2025730A00    <1>
    233                              <1> 
-   234 00000071 54657374696E672025- <1> StrFormatStr:   db "Testing %%s: string 'Rustam' - %s", 0Ah, 0
-   234 0000007A 25733A20737472696E- <1>
-   234 00000083 67202752757374616D- <1>
-   234 0000008C 27202D2025730A00    <1>
+   234                              <1> ;------------------------------------------------
    235                              <1> 
-   236                              <1> ;------------------------------------------------
+   236 00000094 54657374696E672025- <1> BinFormatStr:   db "Testing %%b: number 1011011 - %b", 0Ah, 0
+   236 0000009D 25623A206E756D6265- <1>
+   236 000000A6 722031303131303131- <1>
+   236 000000AF 202D2025620A00      <1>
    237                              <1> 
-   238 00000094 54657374696E672025- <1> BinFormatStr:   db "Testing %%b: number 1011011 - %b", 0Ah, 0
-   238 0000009D 25623A206E756D6265- <1>
-   238 000000A6 722031303131303131- <1>
-   238 000000AF 202D2025620A00      <1>
+   238                              <1> ;------------------------------------------------
    239                              <1> 
-   240                              <1> ;------------------------------------------------
+   240 000000B6 54657374696E672025- <1> DecFormatStr:   db "Testing %%d: number 1256 - %d", 0Ah, 0
+   240 000000BF 25643A206E756D6265- <1>
+   240 000000C8 722031323536202D20- <1>
+   240 000000D1 25640A00            <1>
    241                              <1> 
-   242 000000B6 54657374696E672025- <1> DecFormatStr:   db "Testing %%d: number 1256 - %d", 0Ah, 0
-   242 000000BF 25643A206E756D6265- <1>
-   242 000000C8 722031323536202D20- <1>
-   242 000000D1 25640A00            <1>
+   242                              <1> ;------------------------------------------------
    243                              <1> 
-   244                              <1> ;------------------------------------------------
+   244 000000D5 54657374696E672025- <1> OctFormatStr:   db "Testing %%o: number 30 - %o", 0Ah, 0
+   244 000000DE 256F3A206E756D6265- <1>
+   244 000000E7 72203330202D20256F- <1>
+   244 000000F0 0A00                <1>
    245                              <1> 
-   246 000000D5 54657374696E672025- <1> OctFormatStr:   db "Testing %%o: number 30 - %o", 0Ah, 0
-   246 000000DE 256F3A206E756D6265- <1>
-   246 000000E7 72203330202D20256F- <1>
-   246 000000F0 0A00                <1>
+   246                              <1> ;------------------------------------------------
    247                              <1> 
-   248                              <1> ;------------------------------------------------
+   248 000000F2 54657374696E202525- <1> HexFormatStr:   db "Testin %%x: 25F25A - %x", 0Ah, 0
+   248 000000FB 783A20323546323541- <1>
+   248 00000104 202D2025780A00      <1>
    249                              <1> 
-   250 000000F2 54657374696E202525- <1> HexFormatStr:   db "Testin %%x: 25F25A - %x", 0Ah, 0
-   250 000000FB 783A20323546323541- <1>
-   250 00000104 202D2025780A00      <1>
+   250                              <1> ;------------------------------------------------
    251                              <1> 
-   252                              <1> ;------------------------------------------------
-   253                              <1> 
-   254                              <1> ComplexFormatStr:
-   255 0000010B 537472696E673A2052- <1>                 db "String: Rustam - %s, char ! - %c, decimal 256255 - %d, binary 10110011 - %b, oct 30 - %o, hex 25AB - %x", 0Ah, 0
-   255 00000114 757374616D202D2025- <1>
-   255 0000011D 732C20636861722021- <1>
-   255 00000126 202D2025632C206465- <1>
-   255 0000012F 63696D616C20323536- <1>
-   255 00000138 323535202D2025642C- <1>
-   255 00000141 2062696E6172792031- <1>
-   255 0000014A 30313130303131202D- <1>
-   255 00000153 2025622C206F637420- <1>
-   255 0000015C 3330202D20256F2C20- <1>
-   255 00000165 686578203235414220- <1>
-   255 0000016E 2D2025780A00        <1>
+   252                              <1> ComplexFormatStr:
+   253 0000010B 537472696E673A2052- <1>                 db "String: Rustam - %s, char ! - %c, decimal 256255 - %d, binary 10110011 - %b, oct 30 - %o, hex 25AB - %x", 0Ah, 0
+   253 00000114 757374616D202D2025- <1>
+   253 0000011D 732C20636861722021- <1>
+   253 00000126 202D2025632C206465- <1>
+   253 0000012F 63696D616C20323536- <1>
+   253 00000138 323535202D2025642C- <1>
+   253 00000141 2062696E6172792031- <1>
+   253 0000014A 30313130303131202D- <1>
+   253 00000153 2025622C206F637420- <1>
+   253 0000015C 3330202D20256F2C20- <1>
+   253 00000165 686578203235414220- <1>
+   253 0000016E 2D2025780A00        <1>
+   254                              <1> 
+   255                              <1> __SECT__
    256                              <1> 
    257                              <1> ;================================================
    258                              <1> 
@@ -883,155 +903,155 @@
     68                                  
     69                                  _start:     
     70                                  
-    71 0000034A E847FFFFFF                          call CharUnitTest
+    71 00000344 E847FFFFFF                          call CharUnitTest
     72                                              .PAUSE
     72                              <1> 
-    72 0000034F 90                  <1>  nop
-    72 00000350 4831C0              <1>  xor rax, rax
+    72 00000349 90                  <1>  nop
+    72 0000034A 4831C0              <1>  xor rax, rax
     72                              <1> 
-    72 00000353 BF00000000          <1>  mov rdi, 0
-    72 00000358 48BE-               <1>  mov rsi, PauseBuf
-    72 0000035A [0000000000000000]  <1>
+    72 0000034D BF00000000          <1>  mov rdi, 0
+    72 00000352 48BE-               <1>  mov rsi, PauseBuf
+    72 00000354 [0000000000000000]  <1>
     72                              <1> 
-    72 00000362 BA01000000          <1>  mov rdx, 1
+    72 0000035C BA01000000          <1>  mov rdx, 1
     72                              <1> 
-    72 00000367 0F05                <1>  syscall
+    72 00000361 0F05                <1>  syscall
     72                              <1> 
-    72 00000369 90                  <1>  nop
+    72 00000363 90                  <1>  nop
     73                                  
-    74 0000036A E838FFFFFF                          call StrUnitTest
+    74 00000364 E838FFFFFF                          call StrUnitTest
     75                                              .PAUSE
     75                              <1> 
-    75 0000036F 90                  <1>  nop
-    75 00000370 4831C0              <1>  xor rax, rax
+    75 00000369 90                  <1>  nop
+    75 0000036A 4831C0              <1>  xor rax, rax
     75                              <1> 
-    75 00000373 BF00000000          <1>  mov rdi, 0
-    75 00000378 48BE-               <1>  mov rsi, PauseBuf
-    75 0000037A [0000000000000000]  <1>
+    75 0000036D BF00000000          <1>  mov rdi, 0
+    75 00000372 48BE-               <1>  mov rsi, PauseBuf
+    75 00000374 [0000000000000000]  <1>
     75                              <1> 
-    75 00000382 BA01000000          <1>  mov rdx, 1
+    75 0000037C BA01000000          <1>  mov rdx, 1
     75                              <1> 
-    75 00000387 0F05                <1>  syscall
+    75 00000381 0F05                <1>  syscall
     75                              <1> 
-    75 00000389 90                  <1>  nop
+    75 00000383 90                  <1>  nop
     76                                  
-    77 0000038A E82CFFFFFF                          call DecUnitTest
+    77 00000384 E82CFFFFFF                          call DecUnitTest
     78                                              .PAUSE
     78                              <1> 
-    78 0000038F 90                  <1>  nop
-    78 00000390 4831C0              <1>  xor rax, rax
+    78 00000389 90                  <1>  nop
+    78 0000038A 4831C0              <1>  xor rax, rax
     78                              <1> 
-    78 00000393 BF00000000          <1>  mov rdi, 0
-    78 00000398 48BE-               <1>  mov rsi, PauseBuf
-    78 0000039A [0000000000000000]  <1>
+    78 0000038D BF00000000          <1>  mov rdi, 0
+    78 00000392 48BE-               <1>  mov rsi, PauseBuf
+    78 00000394 [0000000000000000]  <1>
     78                              <1> 
-    78 000003A2 BA01000000          <1>  mov rdx, 1
+    78 0000039C BA01000000          <1>  mov rdx, 1
     78                              <1> 
-    78 000003A7 0F05                <1>  syscall
+    78 000003A1 0F05                <1>  syscall
     78                              <1> 
-    78 000003A9 90                  <1>  nop
+    78 000003A3 90                  <1>  nop
     79                                  
-    80 000003AA E820FFFFFF                          call OctUnitTest
+    80 000003A4 E820FFFFFF                          call OctUnitTest
     81                                              .PAUSE
     81                              <1> 
-    81 000003AF 90                  <1>  nop
-    81 000003B0 4831C0              <1>  xor rax, rax
+    81 000003A9 90                  <1>  nop
+    81 000003AA 4831C0              <1>  xor rax, rax
     81                              <1> 
-    81 000003B3 BF00000000          <1>  mov rdi, 0
-    81 000003B8 48BE-               <1>  mov rsi, PauseBuf
-    81 000003BA [0000000000000000]  <1>
+    81 000003AD BF00000000          <1>  mov rdi, 0
+    81 000003B2 48BE-               <1>  mov rsi, PauseBuf
+    81 000003B4 [0000000000000000]  <1>
     81                              <1> 
-    81 000003C2 BA01000000          <1>  mov rdx, 1
+    81 000003BC BA01000000          <1>  mov rdx, 1
     81                              <1> 
-    81 000003C7 0F05                <1>  syscall
+    81 000003C1 0F05                <1>  syscall
     81                              <1> 
-    81 000003C9 90                  <1>  nop
+    81 000003C3 90                  <1>  nop
     82                                  
-    83 000003CA E811FFFFFF                          call HexUnitTest
+    83 000003C4 E811FFFFFF                          call HexUnitTest
     84                                              .PAUSE
     84                              <1> 
-    84 000003CF 90                  <1>  nop
-    84 000003D0 4831C0              <1>  xor rax, rax
+    84 000003C9 90                  <1>  nop
+    84 000003CA 4831C0              <1>  xor rax, rax
     84                              <1> 
-    84 000003D3 BF00000000          <1>  mov rdi, 0
-    84 000003D8 48BE-               <1>  mov rsi, PauseBuf
-    84 000003DA [0000000000000000]  <1>
+    84 000003CD BF00000000          <1>  mov rdi, 0
+    84 000003D2 48BE-               <1>  mov rsi, PauseBuf
+    84 000003D4 [0000000000000000]  <1>
     84                              <1> 
-    84 000003E2 BA01000000          <1>  mov rdx, 1
+    84 000003DC BA01000000          <1>  mov rdx, 1
     84                              <1> 
-    84 000003E7 0F05                <1>  syscall
+    84 000003E1 0F05                <1>  syscall
     84                              <1> 
-    84 000003E9 90                  <1>  nop
+    84 000003E3 90                  <1>  nop
     85                                  
-    86 000003EA E805FFFFFF                          call BinUnitTest
+    86 000003E4 E805FFFFFF                          call BinUnitTest
     87                                              .PAUSE
     87                              <1> 
-    87 000003EF 90                  <1>  nop
-    87 000003F0 4831C0              <1>  xor rax, rax
+    87 000003E9 90                  <1>  nop
+    87 000003EA 4831C0              <1>  xor rax, rax
     87                              <1> 
-    87 000003F3 BF00000000          <1>  mov rdi, 0
-    87 000003F8 48BE-               <1>  mov rsi, PauseBuf
-    87 000003FA [0000000000000000]  <1>
+    87 000003ED BF00000000          <1>  mov rdi, 0
+    87 000003F2 48BE-               <1>  mov rsi, PauseBuf
+    87 000003F4 [0000000000000000]  <1>
     87                              <1> 
-    87 00000402 BA01000000          <1>  mov rdx, 1
+    87 000003FC BA01000000          <1>  mov rdx, 1
     87                              <1> 
-    87 00000407 0F05                <1>  syscall
+    87 00000401 0F05                <1>  syscall
     87                              <1> 
-    87 00000409 90                  <1>  nop
+    87 00000403 90                  <1>  nop
     88                                  
-    89 0000040A E8F6FEFFFF                          call PercUnitTest
+    89 00000404 E8F6FEFFFF                          call PercUnitTest
     90                                              .PAUSE
     90                              <1> 
-    90 0000040F 90                  <1>  nop
-    90 00000410 4831C0              <1>  xor rax, rax
+    90 00000409 90                  <1>  nop
+    90 0000040A 4831C0              <1>  xor rax, rax
     90                              <1> 
-    90 00000413 BF00000000          <1>  mov rdi, 0
-    90 00000418 48BE-               <1>  mov rsi, PauseBuf
-    90 0000041A [0000000000000000]  <1>
+    90 0000040D BF00000000          <1>  mov rdi, 0
+    90 00000412 48BE-               <1>  mov rsi, PauseBuf
+    90 00000414 [0000000000000000]  <1>
     90                              <1> 
-    90 00000422 BA01000000          <1>  mov rdx, 1
+    90 0000041C BA01000000          <1>  mov rdx, 1
     90                              <1> 
-    90 00000427 0F05                <1>  syscall
+    90 00000421 0F05                <1>  syscall
     90                              <1> 
-    90 00000429 90                  <1>  nop
+    90 00000423 90                  <1>  nop
     91                                  
-    92 0000042A E8E5FEFFFF                          call DefUnitTest
+    92 00000424 E8E5FEFFFF                          call DefUnitTest
     93                                              .PAUSE
     93                              <1> 
-    93 0000042F 90                  <1>  nop
-    93 00000430 4831C0              <1>  xor rax, rax
+    93 00000429 90                  <1>  nop
+    93 0000042A 4831C0              <1>  xor rax, rax
     93                              <1> 
-    93 00000433 BF00000000          <1>  mov rdi, 0
-    93 00000438 48BE-               <1>  mov rsi, PauseBuf
-    93 0000043A [0000000000000000]  <1>
+    93 0000042D BF00000000          <1>  mov rdi, 0
+    93 00000432 48BE-               <1>  mov rsi, PauseBuf
+    93 00000434 [0000000000000000]  <1>
     93                              <1> 
-    93 00000442 BA01000000          <1>  mov rdx, 1
+    93 0000043C BA01000000          <1>  mov rdx, 1
     93                              <1> 
-    93 00000447 0F05                <1>  syscall
+    93 00000441 0F05                <1>  syscall
     93                              <1> 
-    93 00000449 90                  <1>  nop
+    93 00000443 90                  <1>  nop
     94                                  
-    95 0000044A E8D4FEFFFF                          call ComplexUnitTest
+    95 00000444 E8D4FEFFFF                          call ComplexUnitTest
     96                                              .PAUSE
     96                              <1> 
-    96 0000044F 90                  <1>  nop
-    96 00000450 4831C0              <1>  xor rax, rax
+    96 00000449 90                  <1>  nop
+    96 0000044A 4831C0              <1>  xor rax, rax
     96                              <1> 
-    96 00000453 BF00000000          <1>  mov rdi, 0
-    96 00000458 48BE-               <1>  mov rsi, PauseBuf
-    96 0000045A [0000000000000000]  <1>
+    96 0000044D BF00000000          <1>  mov rdi, 0
+    96 00000452 48BE-               <1>  mov rsi, PauseBuf
+    96 00000454 [0000000000000000]  <1>
     96                              <1> 
-    96 00000462 BA01000000          <1>  mov rdx, 1
+    96 0000045C BA01000000          <1>  mov rdx, 1
     96                              <1> 
-    96 00000467 0F05                <1>  syscall
+    96 00000461 0F05                <1>  syscall
     96                              <1> 
-    96 00000469 90                  <1>  nop
+    96 00000463 90                  <1>  nop
     97                                  
     98                                              .EXIT
     98                              <1> 
-    98 0000046A 4831FF              <1>  xor rdi, rdi
-    98 0000046D B83C000000          <1>  mov rax, 03Ch
-    98 00000472 0F05                <1>  syscall
+    98 00000464 4831FF              <1>  xor rdi, rdi
+    98 00000467 B83C000000          <1>  mov rax, 03Ch
+    98 0000046C 0F05                <1>  syscall
     99                                  
    100                                  ;================================================
    101                                  

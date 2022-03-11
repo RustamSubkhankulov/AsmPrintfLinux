@@ -7,7 +7,7 @@ section .text
 
 ;==================FUNCTIONS=====================
 
-;-------------------MyItoa-------------------------
+;-------------------RsItoa-------------------------
 ;
 ; Descr: translates number to string of symbols
 ;
@@ -105,9 +105,11 @@ RsItoa2n:
 
 ;------------------------------------------------
 
-section .data 
+[section .data] 
 
 XlatTable64 db "0123456789ABCDEF"       ; translation table
+
+__SECT__
 
 ;================================================
 

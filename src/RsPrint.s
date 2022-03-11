@@ -1,3 +1,39 @@
+;====================MACRO=======================
+
+;-----------------.PROLOGUE----------------------
+;
+; Descr: pushes arguments in stack in normal order
+;
+;------------------------------------------------
+
+%macro  .PROLOGUE   1-*                 
+                                        ; 1 and more args
+    %rep %0                             
+
+        push %1 
+        %rotate 1
+
+    %endrep 
+
+%endmacro
+
+;------------------.EPILOGUE---------------------
+;
+; Descr: popes arguments from stack in reversed order
+;
+;------------------------------------------------
+
+%macro .EPILOGUE   1-*
+
+    %rep %0
+
+        %rotate -1
+        %pop %1
+
+    %endrep 
+
+%endmacro
+
 ;====================PRINTF======================
 
 ; 'Printf' assembler function made for 
@@ -98,13 +134,14 @@ RsPrint:
 ;------------------------------------------------
 
 RsPrintArg:  
-            add rsi, rdx                ; move rsi -> %    
+            add rsi, rdx                ; move rsi -> %  
+            push rsi                    ; save current pos in format string  
 
             movzx r8, byte [rsi + 1]    
                                         ; get next symbol after '%'
 
             cmp r8, '%'
-            jne .nodblpercent
+            jne .nodblpercent           ; '%%' case 
 
             mov rax, 01d                ; 'write' syscall 
             mov rdx, 01d                ; print one symb
@@ -125,27 +162,19 @@ RsPrintArg:
 
         .jmptable: 
             dq .binary                  ; %b
-            dq .char                    ; 1
-            dq .decimal                 ; 2
-            dq .casedefault             ; 3
-            dq .casedefault             ; 4
-            dq .casedefault             ; 5
-            dq .casedefault             ; 6
-            dq .casedefault             ; 7
-            dq .casedefault             ; 8
-            dq .casedefault             ; 9
-            dq .casedefault             ; 10
-            dq .casedefault             ; 11
-            dq .casedefault             ; 12
+            dq .char                    ; %c
+            dq .decimal                 ; %d
+
+            times 'n' - 'd' dq .casedefault
+
             dq .octagonal               ; %o
-            dq .casedefault             ; 14
-            dq .casedefault             ; 15
-            dq .casedefault             ; 16
+
+            times 'r' - 'o' dq .casedefault
+
             dq .string                  ; %s
-            dq .casedefault             ; 18
-            dq .casedefault             ; 19
-            dq .casedefault             ; 20
-            dq .casedefault             ; 21
+
+            times 'w' - 's' dq .casedefault
+
             dq .hexadecimal             ; %x
 
         .binary:
@@ -183,6 +212,7 @@ RsPrintArg:
 
         .fin: 
             xor rdx, rdx                ; counter = 0
+            pop rsi                     ; restore rsi value 
             add rsi, 2                  ; rsi -> next sym after specifier
             
             ret 
@@ -196,15 +226,12 @@ RsPrintArg:
 ;
 ; Exit : RBX -> next arguments (+8)
 ;
-; Destr: 
+; Destr: RSI, RDX, RAX 
 ;------------------------------------------------
 
 RsPrintArgDec:
 
-            push rsi
-            push rbx                    ; saving current position in format string
-                                        ; no need to save rdx
-                                        ; save current argument position in stack (rbx) 
+            push rbx                    ; save current argument position in stack (rbx) 
 
             lea rsi, [PrintArgBuf]      ; buffer for string
             mov r9, 10d                 ; base of numeric system
@@ -216,8 +243,7 @@ RsPrintArgDec:
 
             call RsWriteStr             ; call 'write'
 
-            pop rbx 
-            pop rsi                     ; restore values
+            pop rbx                     ; restore values
             add rbx, 8                  ; rbx -> next argument
 
             ret 
@@ -232,14 +258,11 @@ RsPrintArgDec:
 ;        RDI == 1(stdout)
 ; Exit : RBX -> next argument (+8)
 ;
-; Destr: RDX
+; Destr: RDX, RAX 
 ;------------------------------------------------
 
 RsPrintArg2n:
-            push rsi
-            push rbx                    ; saving current position in format string
-                                        ; no need to save rdx
-                                        ; save current argument position in stack (rbx) 
+            push rbx                    ; save current argument position in stack (rbx) 
 
             lea rsi, [PrintArgBuf]      ; buffer for string
             mov rbx, [rbx]              ; get argument value
@@ -255,7 +278,6 @@ RsPrintArg2n:
             call RsWriteStr             ; call 'write'
 
             pop rbx 
-            pop rsi                     ; restore values
             add rbx, 8                  ; rbx -> next argument
 
             ret 
@@ -269,13 +291,10 @@ RsPrintArg2n:
 ;
 ; Exit : RBX -> next argument (+8)
 ;
-; Destr: RDX 
+; Destr: RDX, RAX, RSI 
 ;------------------------------------------------
 
 RsPrintArgStr:
-            push rsi                    ; saving current position in format string
-                                        ; no need to save rdx
-
             mov rsi, [rbx]              ; rsi -> argument string
             call RsStrlen               ; rcx = lenght of string
 
@@ -284,7 +303,6 @@ RsPrintArgStr:
 
             syscall                     ; call 'write'
 
-            pop rsi                     ; restore value
             add rbx, 8
 
             ret 
@@ -298,13 +316,10 @@ RsPrintArgStr:
 ;
 ; Exit:  RBX -> next argument (+8)
 ;
-; Destr: RDX
+; Destr: RDX, RAX, RSI 
 ;------------------------------------------------
 
 RsPrintArgChar:
-            push rsi                    ; saving current position in format string
-                                        ; no need to save rdx
-
             mov r8, 01d                 ; one symbol
             lea rsi, [PrintArgBuf]      ; buffer for argument
 
@@ -313,7 +328,6 @@ RsPrintArgChar:
 
             call RsWriteStr             ; call 'write'
 
-            pop rsi 
             add rbx, 8                  ; rbx -> next argument
 
             ret 
@@ -328,13 +342,12 @@ RsPrintArgChar:
 ;        RSI - start of the string
 ;        RDI == 1 (stdout)
 ;
-; Exit:  RAX == 1
+; Exit:  none 
 ;
-; Destr: RDX
+; Destr: RDX, RAX 
 ;------------------------------------------------
 
 RsWriteStr:
-
         mov rdx, r8                     ; rdx = number of symbols
         mov rax, 01d                    ; 'write' syscall
 
@@ -344,9 +357,11 @@ RsWriteStr:
 
 ;------------------------------------------------
 
-section .bss  
+[section .bss]  
 
 PrintArgBuf: resb 64                 ; buffer used for itoa
+
+__SECT__
 
 ;================================================
 

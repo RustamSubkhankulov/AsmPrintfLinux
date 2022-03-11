@@ -51,11 +51,9 @@ StrUnitTest:
 
         ret 
 
-section .data 
-
+[section .data] 
 StrArgument db "Rustam", 0
-
-section .text 
+__SECT__ 
 
 ;-----------------DecUnitTest--------------------
 ;
@@ -215,7 +213,7 @@ ComplexUnitTest:
 
 ;================================================
 
-section .data 
+[section .data] 
 
 ;------------------------------------------------
 
@@ -253,6 +251,8 @@ HexFormatStr:   db "Testin %%x: 25F25A - %x", 0Ah, 0
 
 ComplexFormatStr:
                 db "String: Rustam - %s, char ! - %c, decimal 256255 - %d, binary 10110011 - %b, oct 30 - %o, hex 25AB - %x", 0Ah, 0
+
+__SECT__
 
 ;================================================
 
