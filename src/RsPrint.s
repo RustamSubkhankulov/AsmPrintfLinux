@@ -79,7 +79,7 @@ RsPrint:
             mov rbp, rsp                ; make stack frame
 
             mov rsi, [rbp + 16]         ; rbp -> start of format string
-            lea rbx, [rbp + 24]         ; rbx -> first argument
+            lea r12, [rbp + 24]         ; r12 -> first argument
 
             xor rdx, rdx                ; counter of symbols 
 
@@ -123,14 +123,15 @@ RsPrint:
 ;        according to specifier
 ;
 ; Entry: RSI + RDX -> % 
-;        RBX -> next arg to be printed
+;        R12 -> next arg to be printed
 ;        RAX == 1 (write)
 ;        RDI == 1 (stdout)
 ;
 ; Exit : RDX == 0
 ;        RSI -> next symb after specifier
+;        R12 -> next argument in stack (+8)
 ;
-; Destr:
+; Destr: R8, R9, RAX 
 ;------------------------------------------------
 
 RsPrintArg:  
@@ -221,21 +222,18 @@ RsPrintArg:
 ;
 ; Descr: Prints number in decimal numeric system
 ;
-; Entry: RBX -> arguments
+; Entry: R12 -> arguments
 ;        RDI == 1 (stdout)
 ;
-; Exit : RBX -> next arguments (+8)
+; Exit : R12 -> next arguments (+8)
 ;
 ; Destr: RSI, RDX, RAX 
 ;------------------------------------------------
 
 RsPrintArgDec:
-
-            push rbx                    ; save current argument position in stack (rbx) 
-
             lea rsi, [PrintArgBuf]      ; buffer for string
             mov r9, 10d                 ; base of numeric system
-            mov rbx, [rbx]              ; get argument value
+            mov rbx, [r12]              ; get argument value
 
             call RsItoa                 ; now R8 = number of symbols in string 
                                         ; rsi remains it value 
@@ -243,8 +241,7 @@ RsPrintArgDec:
 
             call RsWriteStr             ; call 'write'
 
-            pop rbx                     ; restore values
-            add rbx, 8                  ; rbx -> next argument
+            add r12, 8                  ; r12 -> next argument
 
             ret 
 
@@ -254,18 +251,16 @@ RsPrintArgDec:
 ;        base, that is a power of 2 (2 ^n)
 ;
 ; Entry: RCX == n
-;        RBX -> current argument
+;        R12 -> current argument
 ;        RDI == 1(stdout)
-; Exit : RBX -> next argument (+8)
+; Exit : R12 -> next argument (+8)
 ;
 ; Destr: RDX, RAX 
 ;------------------------------------------------
 
 RsPrintArg2n:
-            push rbx                    ; save current argument position in stack (rbx) 
-
             lea rsi, [PrintArgBuf]      ; buffer for string
-            mov rbx, [rbx]              ; get argument value
+            mov rbx, [r12]              ; get argument value
 
             mov rdx, 1
             shl rdx, cl
@@ -277,8 +272,7 @@ RsPrintArg2n:
 
             call RsWriteStr             ; call 'write'
 
-            pop rbx 
-            add rbx, 8                  ; rbx -> next argument
+            add r12, 8                  ; r12 -> next argument
 
             ret 
 
@@ -287,15 +281,15 @@ RsPrintArg2n:
 ; Descr: Writes string argument
 ;
 ; Entry: RDI == 1
-;        RBX -> current arguments ( address of string)
+;        R12 -> current arguments ( address of string)
 ;
-; Exit : RBX -> next argument (+8)
+; Exit : R12 -> next argument (+8)
 ;
 ; Destr: RDX, RAX, RSI 
 ;------------------------------------------------
 
 RsPrintArgStr:
-            mov rsi, [rbx]              ; rsi -> argument string
+            mov rsi, [r12]              ; rsi -> argument string
             call RsStrlen               ; rcx = lenght of string
 
             mov rdx, rcx                ; rdx = number of symbols
@@ -303,7 +297,7 @@ RsPrintArgStr:
 
             syscall                     ; call 'write'
 
-            add rbx, 8
+            add r12, 8                  ; r12 -> next arg
 
             ret 
 
@@ -312,9 +306,9 @@ RsPrintArgStr:
 ; Descr: Writes char argument in terminal
 ;
 ; Entry: RDI == 1
-;        RBX -> current  argument
+;        R12 -> current  argument
 ;
-; Exit:  RBX -> next argument (+8)
+; Exit:  R12 -> next argument (+8)
 ;
 ; Destr: RDX, RAX, RSI 
 ;------------------------------------------------
@@ -323,12 +317,12 @@ RsPrintArgChar:
             mov r8, 01d                 ; one symbol
             lea rsi, [PrintArgBuf]      ; buffer for argument
 
-            mov rdx, [rbx]              ; get argument
+            mov rdx, [r12]              ; get argument
             mov [rsi], rdx              ; store char in buffer
 
             call RsWriteStr             ; call 'write'
 
-            add rbx, 8                  ; rbx -> next argument
+            add r12, 8                  ; r12 -> next argument
 
             ret 
             

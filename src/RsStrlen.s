@@ -14,6 +14,7 @@ section .text
 ; Entry:   RSI - address of the string
 ;
 ; Exit:    RCX - lenght of the string
+;          RSI remains its value
 ;
 ; Desrt:   none
 ;-------------------------------------------------
@@ -32,7 +33,6 @@ RsStrlen:
             loop .loop                  ; while ([di] != 0)
 
         .ret: 
-            ;add rcx, 2                   ; get lenght of the string
             neg rcx      
 
             pop rsi                     ; restore rsi value 
