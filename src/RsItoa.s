@@ -15,10 +15,10 @@ section .text
 ;        R8 - number of symbols in string
 ;
 ; Entry: RSI - start of the string
-;        R9 - base of numeric system 
+;        RCX - base of numeric system 
 ;        RBX - number to be translated
 ;
-; Destr: RAX, RDX
+; Destr: RAX, RDX, R15 
 ;------------------------------------------------
 
 RsItoa:
@@ -28,7 +28,7 @@ RsItoa:
 
     .CountOffset:
         xor rdx, rdx                    ; rdx:rax / op64 = rax, rdx = remainder 
-        div r9                          ; div by base
+        div rcx                         ; div by base
 
         cmp rax, 0                      ; cmp result with 0
         je .main                        ; if equal, jmp to main 
@@ -39,11 +39,12 @@ RsItoa:
 
     .main:
         mov rax, rbx                    ; get value again
+        mov r15, rcx                    ; r15 == base 
         mov rcx, r8                     ; get number of symbols
 
     .loop:
         xor rdx, rdx                    ; for division
-        div r9                          ; divide by base 
+        div r15                         ; divide by base 
 
         mov dl, [rdx + XlatTable64]     ; converting symbol
 

@@ -1,46 +1,10 @@
-;====================MACRO=======================
-
-;-----------------.PROLOGUE----------------------
-;
-; Descr: pushes arguments in stack in normal order
-;
-;------------------------------------------------
-
-%macro  .PROLOGUE   1-*                 
-                                        ; 1 and more args
-    %rep %0                             
-
-        push %1 
-        %rotate 1
-
-    %endrep 
-
-%endmacro
-
-;------------------.EPILOGUE---------------------
-;
-; Descr: popes arguments from stack in reversed order
-;
-;------------------------------------------------
-
-%macro .EPILOGUE   1-*
-
-    %rep %0
-
-        %rotate -1
-        %pop %1
-
-    %endrep 
-
-%endmacro
-
 ;====================PRINTF======================
 
-; 'Printf' assembler function made for 
+; 'Printf' assembler function made for
 ;                         Linux x86_64
 ;
 ; File consists unit tests for functions
-; Includes STRLIB library 
+; Includes STRLIB library
 
 ; %s - '0'-terminated string
 ; %c - symbol
@@ -56,11 +20,11 @@
 ;================================================
 
 %ifndef rsPrint
-%define rsPrint 
+%define rsPrint
 
 ;================================================
 
-section .text 
+section .text
 
 ;==================FUNCTIONS=====================
 
@@ -74,14 +38,14 @@ section .text
 ; Desrt: a lot
 ;-------------------------------------------------
 
-RsPrint:     
+RsPrint:
             push rbp
             mov rbp, rsp                ; make stack frame
 
             mov rsi, [rbp + 16]         ; rbp -> start of format string
             lea r12, [rbp + 24]         ; r12 -> first argument
 
-            xor rdx, rdx                ; counter of symbols 
+            xor rdx, rdx                ; counter of symbols
 
             mov rdi, 01h                ; stdout
 
@@ -90,12 +54,12 @@ RsPrint:
             je .fin
 
             cmp byte [rsi + rdx], '%'   ; if there specifier
-            je .write 
+            je .write
 
             inc rdx                     ; to next symbol
-            jmp .loop 
+            jmp .loop
 
-        .write:  
+        .write:
             cmp rdx, 0                  ; if counter == 0
             je .arg                     ; no need to write
 
@@ -104,25 +68,25 @@ RsPrint:
 
         .arg:
             call RsPrintArg             ; print argument
-            jmp .loop 
+            jmp .loop
 
         .fin:
             cmp rdx, 0                  ; if counter == 0
-            je .ret                     ; no need to write 
+            je .ret                     ; no need to write
 
             mov rax, 01h                ; 'write' syscall code
             syscall                     ; else write
 
-        .ret: 
+        .ret:
             pop rbp                     ; restore rbp value
-            ret 
+            ret
 
 ;------------------RsPrintArg---------------------
 ;
 ; Descr: Prints in terminal argument in the way
 ;        according to specifier
 ;
-; Entry: RSI + RDX -> % 
+; Entry: RSI + RDX -> %
 ;        R12 -> next arg to be printed
 ;        RAX == 1 (write)
 ;        RDI == 1 (stdout)
@@ -131,25 +95,25 @@ RsPrint:
 ;        RSI -> next symb after specifier
 ;        R12 -> next argument in stack (+8)
 ;
-; Destr: R8, R9, RAX 
+; Destr: R8, R9, RAX
 ;------------------------------------------------
 
-RsPrintArg:  
-            add rsi, rdx                ; move rsi -> %  
-            push rsi                    ; save current pos in format string  
+RsPrintArg:
+            add rsi, rdx                ; move rsi -> %
+            push rsi                    ; save current pos in format string
 
-            movzx r8, byte [rsi + 1]    
+            movzx r8, byte [rsi + 1]
                                         ; get next symbol after '%'
 
             cmp r8, '%'
-            jne .nodblpercent           ; '%%' case 
+            jne .nodblpercent           ; '%%' case
 
-            mov rax, 01d                ; 'write' syscall 
+            mov rax, 01d                ; 'write' syscall
             mov rdx, 01d                ; print one symb
 
             syscall                     ; 'write' one %
 
-            jmp .fin 
+            jmp .fin
 
         .nodblpercent:
             sub r8, 'b'                 ; r8 = offset of the symbol
@@ -161,7 +125,7 @@ RsPrintArg:
             mov r8, [.jmptable + r8 * 8]
             jmp r8                      ; else jmp using table
 
-        .jmptable: 
+        .jmptable:
             dq .binary                  ; %b
             dq .char                    ; %c
             dq .decimal                 ; %d
@@ -180,101 +144,80 @@ RsPrintArg:
 
         .binary:
             mov rcx, 1
-            jmp .case2n
+            jmp .casenum
 
         .octagonal:
             mov rcx, 3
-            jmp .case2n
+            jmp .casenum
 
         .hexadecimal:
             mov rcx, 4
-            jmp .case2n
+            jmp .casenum
 
         .decimal:
-            call RsPrintArgDec
-            jmp .fin
-
-        .char: 
-            call RsPrintArgChar
+            mov rcx, 10
+            
+        .casenum:
+            call RsPrintArgNum
             jmp .fin 
+
+        .char:
+            call RsPrintArgChar
+            jmp .fin
 
         .string:
             call RsPrintArgStr
             jmp .fin
 
-        .case2n:
-            call RsPrintArg2n
-            jmp .fin 
-
         .casedefault:
             mov rdx, 2                  ; write "%%"
-            mov rax, 01d                ; 'write' syscall 
-            syscall 
+            mov rax, 01d                ; 'write' syscall
+            syscall
 
-        .fin: 
+        .fin:
             xor rdx, rdx                ; counter = 0
-            pop rsi                     ; restore rsi value 
+            pop rsi                     ; restore rsi value
             add rsi, 2                  ; rsi -> next sym after specifier
-            
-            ret 
 
-;------------------RsPrintArgDec-----------------
+            ret
+
+;------------------RsPrintArgNum-----------------
 ;
-; Descr: Prints number in decimal numeric system
+; Descr: writes %d, %b, %o or %x argument
 ;
-; Entry: R12 -> arguments
-;        RDI == 1 (stdout)
+; Entry: RCX = 10 for %d of 1,3 and 4 for
+;        %b, %o and %x
 ;
-; Exit : R12 -> next arguments (+8)
+; Exit:  R12 -> next arg (+8)
 ;
-; Destr: RSI, RDX, RAX 
+; Destr: RSI, RAX, RDX
 ;------------------------------------------------
 
-RsPrintArgDec:
-            lea rsi, [PrintArgBuf]      ; buffer for string
-            mov r9, 10d                 ; base of numeric system
-            mov rbx, [r12]              ; get argument value
-
-            call RsItoa                 ; now R8 = number of symbols in string 
-                                        ; rsi remains it value 
-                                        ; rdi still equals 1
-
-            call RsWriteStr             ; call 'write'
-
-            add r12, 8                  ; r12 -> next argument
-
-            ret 
-
-;------------------RsPrintArg2n------------------
-;
-; Descr: Print argument in numeric system with 
-;        base, that is a power of 2 (2 ^n)
-;
-; Entry: RCX == n
-;        R12 -> current argument
-;        RDI == 1(stdout)
-; Exit : R12 -> next argument (+8)
-;
-; Destr: RDX, RAX 
-;------------------------------------------------
-
-RsPrintArg2n:
+RsPrintArgNum:
             lea rsi, [PrintArgBuf]      ; buffer for string
             mov rbx, [r12]              ; get argument value
+
+            cmp rcx, 10
+            je .decimal                 ; jmp if  %d (rcx == 10 )
 
             mov rdx, 1
-            shl rdx, cl
+            shl rdx, cl                 ; counting mask for Itoa2n
             dec rdx                     ; rdx = 2^n - 1 (mask)
 
             call RsItoa2n               ; get string in buffer
                                         ; rsi remains its value
                                         ; rdi still equals 1
+            jmp .writestr               ; jmp to write from buffer
 
+        .decimal:
+            call RsItoa                 ; call Itoa for 10-numeric system
+
+        .writestr:
             call RsWriteStr             ; call 'write'
 
             add r12, 8                  ; r12 -> next argument
 
-            ret 
+            ret
 
 ;------------------RsPrintArgStr-----------------
 ;
@@ -285,7 +228,7 @@ RsPrintArg2n:
 ;
 ; Exit : R12 -> next argument (+8)
 ;
-; Destr: RDX, RAX, RSI 
+; Destr: RDX, RAX, RSI
 ;------------------------------------------------
 
 RsPrintArgStr:
@@ -299,7 +242,7 @@ RsPrintArgStr:
 
             add r12, 8                  ; r12 -> next arg
 
-            ret 
+            ret
 
 ;------------------RsPrintArgChar----------------
 ;
@@ -310,7 +253,7 @@ RsPrintArgStr:
 ;
 ; Exit:  R12 -> next argument (+8)
 ;
-; Destr: RDX, RAX, RSI 
+; Destr: RDX, RAX, RSI
 ;------------------------------------------------
 
 RsPrintArgChar:
@@ -324,21 +267,21 @@ RsPrintArgChar:
 
             add r12, 8                  ; r12 -> next argument
 
-            ret 
-            
+            ret
+
 
 ;-------------------RsWriteStr-------------------
 ;
-; Descr: writes particular number of symbols in 
-;        terminal using 'write' Linux system call 
+; Descr: writes particular number of symbols in
+;        terminal using 'write' Linux system call
 ;
 ; Entry: R8 - number of synbols to be printed
 ;        RSI - start of the string
 ;        RDI == 1 (stdout)
 ;
-; Exit:  none 
+; Exit:  none
 ;
-; Destr: RDX, RAX 
+; Destr: RDX, RAX
 ;------------------------------------------------
 
 RsWriteStr:
@@ -347,11 +290,11 @@ RsWriteStr:
 
         syscall                         ; call write
 
-        ret 
+        ret
 
 ;------------------------------------------------
 
-[section .bss]  
+[section .bss]
 
 PrintArgBuf: resb 64                 ; buffer used for itoa
 
