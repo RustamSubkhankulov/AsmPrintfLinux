@@ -3,7 +3,7 @@
 
 ;================================================
 
-global  CharUnitTest, StrUnitTest, DecUnitTest, OctUnitTest, HexUnitTest, BinUnitTest, PercUnitTest, DefUnitTest, ComplexUnitTest
+global  UnitTesting
 
 extern  RsPrint
 
@@ -11,7 +11,69 @@ extern  RsPrint
 
 section .text 
 
+;===================MACRO========================
+
+;-------------------.PAUSE-----------------------
+
+%macro      .PAUSE 0 
+                                        ; getchar();
+	        nop
+		    xor rax, rax                ; read
+
+		    mov rdi, 0                  ; stdin - first arg
+            mov rsi, PauseBuf
+                                        ; char* buf - second arg
+            mov rdx, 1                  ; read one byte
+
+            syscall                     ; call read         
+            
+		    nop
+%endmacro
+
+[section .data] 
+
+PauseBuf    db 0                        ; reads one symb
+
+__SECT__
+
 ;=================FUNCTIONS======================
+
+;----------------UnitTesting---------------------
+;
+; Descr: executes unit testing of RsPrint
+;
+;------------------------------------------------
+
+UnitTesting:
+
+        call CharUnitTest
+        .PAUSE
+
+        call StrUnitTest
+        .PAUSE
+
+        call DecUnitTest
+        .PAUSE
+
+        call OctUnitTest
+        .PAUSE
+
+        call HexUnitTest
+        .PAUSE
+
+        call BinUnitTest
+        .PAUSE
+
+        call PercUnitTest
+        .PAUSE
+
+        call DefUnitTest
+        .PAUSE
+
+        call ComplexUnitTest
+        .PAUSE
+
+        ret 
 
 ;----------------CharUnitTest--------------------
 ;
