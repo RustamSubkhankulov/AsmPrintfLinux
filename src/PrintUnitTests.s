@@ -251,7 +251,7 @@ OctFormatStr:   db "Testing %%o: number 30 - %o", 0Ah, 0
 
 ;------------------------------------------------
 
-HexFormatStr:   db "Testin %%x: 25F25A - %x", 0Ah, 0
+HexFormatStr:   db "Testing %%x: 25F25A - %x", 0Ah, 0
 
 ;------------------------------------------------
 
