@@ -57,7 +57,7 @@ section .text
 ;        First arg  - format string
 ;        Next  args - arguments for format string
 ; Exit : None
-; Desrt: a lot
+; Desrt: R8, RAX, RBX, RCX, R15, RDX, RSI, RDI, R13
 ;-------------------------------------------------
 
 RsPrint:
@@ -120,8 +120,9 @@ RsPrint:
 ; Exit : RDX == 0
 ;        RSI -> next symb after specifier
 ;        R12 -> next argument in stack (+8)
+;        R13 == number of symbols in buffer
 ;
-; Destr: R8, R9, RAX
+; Destr: R8, RAX, RBX, RCX, R15, RDI
 ;------------------------------------------------
 
 PrintArg:
@@ -214,7 +215,7 @@ PrintArg:
 ; Exit:  R12 -> next arg (+8)
 ;        R13 = R13 + number of printed symbols
 ;
-; Destr: RSI, RAX, RDX
+; Destr: RSI, RAX, RDX, RBX, R15, RDI 
 ;------------------------------------------------
 
 PrintArgNum:
@@ -245,12 +246,11 @@ PrintArgNum:
 ;
 ; Descr: Writes string argument
 ;
-; Entry: RDI == 1
-;        R12 -> current arguments ( address of string)
+; Entry: R12 -> current arguments ( address of string)
 ;
 ; Exit : R12 -> next argument (+8)
 ;
-; Destr: RDX, RAX, RSI
+; Destr: RDX, RAX, RSI, RCX, RDI 
 ;------------------------------------------------
 
 PrintArgStr:
@@ -376,25 +376,3 @@ __SECT__
 ;================================================
 
 %endif
-
-; ;--------------------WriteStr--------------------
-; ;
-; ; Descr: writes particular number of symbols in
-; ;        terminal using 'write' Linux system call
-; ;
-; ; Entry: R8 - number of synbols to be printed
-; ;        RSI - start of the string
-; ;        RDI == 1 (stdout)
-; ;
-; ; Exit:  none
-; ;
-; ; Destr: RDX, RAX
-; ;------------------------------------------------
-
-; WriteStr:
-;         mov rdx, r8                     ; rdx = number of symbols
-;         mov rax, WRITE                  ; 'write' syscall
-
-;         syscall                         ; call write
-
-;         ret
