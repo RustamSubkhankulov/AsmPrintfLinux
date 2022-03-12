@@ -256,7 +256,7 @@ HexFormatStr:   db "Testin %%x: 25F25A - %x", 0Ah, 0
 ;------------------------------------------------
 
 ComplexFormatStr:
-                db "String: Rustam - %s", 08d, " char ! - %c, decimal 256255 - %d, binary 10110011 - %b, oct 30 - %o, hex 25AB - %x", 0Ah, 0
+                db "String: Rustam - %s, char ! - %c, decimal 256255 - %d, binary 10110011 - %b, oct 30 - %o, hex 25AB - %x", 0Ah, 0
 
 __SECT__
 

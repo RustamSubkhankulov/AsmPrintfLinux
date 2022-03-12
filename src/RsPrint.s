@@ -19,6 +19,16 @@
 
 ;================================================
 
+%define EOL     0                       
+                                        ; end of line 
+%define WRITE   1
+                                        ; 'write' syscall code 
+
+%define STDOUT  1                       
+                                        ; stdout fd 
+
+;================================================
+
 %ifndef rsPrint
 %define rsPrint
 
@@ -53,10 +63,10 @@ RsPrint:
 
             xor rdx, rdx                ; counter of symbols
 
-            mov rdi, 01h                ; stdout
+            mov rdi, STDOUT             ; stdout
 
         .loop:
-            cmp byte [rsi + rdx], 0     ; if there EOL
+            cmp byte [rsi + rdx], EOL   ; if there EOL
             je .fin
 
             cmp byte [rsi + rdx], '%'   ; if there specifier
@@ -69,25 +79,25 @@ RsPrint:
             cmp rdx, 0                  ; if counter == 0
             je .arg                     ; no need to write
 
-            mov rax, 01h                ; 'write' syscall code
+            mov rax, WRITE              ; 'write' syscall code
             syscall                     ; else write
 
         .arg:
-            call RsPrintArg             ; print argument
+            call PrintArg             ; print argument
             jmp .loop
 
         .fin:
             cmp rdx, 0                  ; if counter == 0
             je .ret                     ; no need to write
 
-            mov rax, 01h                ; 'write' syscall code
+            mov rax, WRITE              ; 'write' syscall code
             syscall                     ; else write
 
         .ret:
             pop rbp                     ; restore rbp value
             ret
 
-;------------------RsPrintArg---------------------
+;-------------------PrintArg----------------------
 ;
 ; Descr: Prints in terminal argument in the way
 ;        according to specifier
@@ -104,7 +114,7 @@ RsPrint:
 ; Destr: R8, R9, RAX
 ;------------------------------------------------
 
-RsPrintArg:
+PrintArg:
             add rsi, rdx                ; move rsi -> %
             push rsi                    ; save current pos in format string
 
@@ -114,7 +124,7 @@ RsPrintArg:
             cmp r8, '%'
             jne .nodblpercent           ; '%%' case
 
-            mov rax, 01d                ; 'write' syscall
+            mov rax, WRITE              ; 'write' syscall
             mov rdx, 01d                ; print one symb
 
             syscall                     ; 'write' one %
@@ -164,20 +174,20 @@ RsPrintArg:
             mov rcx, 10
             
         .casenum:
-            call RsPrintArgNum
+            call PrintArgNum
             jmp .fin 
 
         .char:
-            call RsPrintArgChar
+            call PrintArgChar
             jmp .fin
 
         .string:
-            call RsPrintArgStr
+            call PrintArgStr
             jmp .fin
 
         .casedefault:
             mov rdx, 2                  ; write "%%"
-            mov rax, 01d                ; 'write' syscall
+            mov rax, WRITE              ; 'write' syscall
             syscall
 
         .fin:
@@ -187,7 +197,7 @@ RsPrintArg:
 
             ret
 
-;------------------RsPrintArgNum-----------------
+;-------------------PrintArgNum------------------
 ;
 ; Descr: writes %d, %b, %o or %x argument
 ;
@@ -199,7 +209,7 @@ RsPrintArg:
 ; Destr: RSI, RAX, RDX
 ;------------------------------------------------
 
-RsPrintArgNum:
+PrintArgNum:
             lea rsi, [PrintArgBuf]      ; buffer for string
             mov rbx, [r12]              ; get argument value
 
@@ -219,13 +229,13 @@ RsPrintArgNum:
             call RsItoa                 ; call Itoa for 10-numeric system
 
         .writestr:
-            call RsWriteStr             ; call 'write'
+            call WriteStr             ; call 'write'
 
             add r12, 8                  ; r12 -> next argument
 
             ret
 
-;------------------RsPrintArgStr-----------------
+;-------------------PrintArgStr------------------
 ;
 ; Descr: Writes string argument
 ;
@@ -237,12 +247,12 @@ RsPrintArgNum:
 ; Destr: RDX, RAX, RSI
 ;------------------------------------------------
 
-RsPrintArgStr:
+PrintArgStr:
             mov rsi, [r12]              ; rsi -> argument string
             call RsStrlen               ; rcx = lenght of string
 
             mov rdx, rcx                ; rdx = number of symbols
-            mov rax, 01d                ; now: rax == 1, rdi == 1
+            mov rax, WRITE              ; now: rax == 1, rdi == 1
 
             syscall                     ; call 'write'
 
@@ -250,7 +260,7 @@ RsPrintArgStr:
 
             ret
 
-;------------------RsPrintArgChar----------------
+;-------------------PrintArgChar-----------------
 ;
 ; Descr: Writes char argument in terminal
 ;
@@ -262,21 +272,20 @@ RsPrintArgStr:
 ; Destr: RDX, RAX, RSI
 ;------------------------------------------------
 
-RsPrintArgChar:
+PrintArgChar:
             mov r8, 01d                 ; one symbol
             lea rsi, [PrintArgBuf]      ; buffer for argument
 
             mov rdx, [r12]              ; get argument
             mov [rsi], rdx              ; store char in buffer
 
-            call RsWriteStr             ; call 'write'
+            call WriteStr             ; call 'write'
 
             add r12, 8                  ; r12 -> next argument
 
             ret
 
-
-;-------------------RsWriteStr-------------------
+;--------------------WriteStr--------------------
 ;
 ; Descr: writes particular number of symbols in
 ;        terminal using 'write' Linux system call
@@ -290,9 +299,9 @@ RsPrintArgChar:
 ; Destr: RDX, RAX
 ;------------------------------------------------
 
-RsWriteStr:
+WriteStr:
         mov rdx, r8                     ; rdx = number of symbols
-        mov rax, 01d                    ; 'write' syscall
+        mov rax, WRITE                  ; 'write' syscall
 
         syscall                         ; call write
 
