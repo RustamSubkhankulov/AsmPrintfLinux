@@ -72,31 +72,31 @@ global _start
 
 _start:     
 
-            call CharUnitTest
+            ;call CharUnitTest
             .PAUSE
 
-            call StrUnitTest
+            ;call StrUnitTest
             .PAUSE
 
-            call DecUnitTest
+            ;call DecUnitTest
             .PAUSE
 
-            call OctUnitTest
+            ;call OctUnitTest
             .PAUSE
 
-            call HexUnitTest
+            ;call HexUnitTest
             .PAUSE
 
-            call BinUnitTest
+            ;call BinUnitTest
             .PAUSE
 
-            call PercUnitTest
+            ;call PercUnitTest
             .PAUSE
 
-            call DefUnitTest
+            ;call DefUnitTest
             .PAUSE
 
-            call ComplexUnitTest
+            ;call ComplexUnitTest
             .PAUSE
 
             .EXIT

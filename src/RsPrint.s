@@ -63,7 +63,7 @@ RsPrint:
 
             xor rdx, rdx                ; counter of symbols
 
-            mov rdi, STDOUT             ; stdout
+            ;mov rdi, STDOUT             ; stdout
 
         .loop:
             cmp byte [rsi + rdx], EOL   ; if there EOL
@@ -79,8 +79,9 @@ RsPrint:
             cmp rdx, 0                  ; if counter == 0
             je .arg                     ; no need to write
 
-            mov rax, WRITE              ; 'write' syscall code
-            syscall                     ; else write
+            ;mov rax, WRITE              ; 'write' syscall code
+            call WriteInBuf
+            ;syscall                     ; else write
 
         .arg:
             call PrintArg             ; print argument
@@ -90,8 +91,12 @@ RsPrint:
             cmp rdx, 0                  ; if counter == 0
             je .ret                     ; no need to write
 
-            mov rax, WRITE              ; 'write' syscall code
-            syscall                     ; else write
+            ;mov rax, WRITE              ; 'write' syscall code
+            ;syscall                     ; else write
+
+            call WriteInBuf
+
+            call FlushBuf
 
         .ret:
             pop rbp                     ; restore rbp value
@@ -124,10 +129,12 @@ PrintArg:
             cmp r8, '%'
             jne .nodblpercent           ; '%%' case
 
-            mov rax, WRITE              ; 'write' syscall
+            ;mov rax, WRITE              ; 'write' syscall
             mov rdx, 01d                ; print one symb
 
-            syscall                     ; 'write' one %
+            ;syscall                     ; 'write' one %
+
+            call WriteInBuf
 
             jmp .fin
 
@@ -187,8 +194,10 @@ PrintArg:
 
         .casedefault:
             mov rdx, 2                  ; write "%%"
-            mov rax, WRITE              ; 'write' syscall
-            syscall
+            ;mov rax, WRITE              ; 'write' syscall
+            ;syscall
+
+            call WriteInBuf
 
         .fin:
             xor rdx, rdx                ; counter = 0
@@ -223,13 +232,13 @@ PrintArgNum:
             call RsItoa2n               ; get string in buffer
                                         ; rsi remains its value
                                         ; rdi still equals 1
-            jmp .writestr               ; jmp to write from buffer
+            ;jmp .writestr               ; jmp to write from buffer
 
         .decimal:
             call RsItoa                 ; call Itoa for 10-numeric system
 
-        .writestr:
-            call WriteStr             ; call 'write'
+        ;.writestr:
+            ;call WriteStr             ; call 'write'
 
             add r12, 8                  ; r12 -> next argument
 
@@ -273,15 +282,15 @@ PrintArgStr:
 ;------------------------------------------------
 
 PrintArgChar:
-            mov r8, 01d                 ; one symbol
-            lea rsi, [PrintArgBuf]      ; buffer for argument
+            ;mov r8, 01d                 ; one symbol
+            ;lea rsi, [PrintArgBuf]      ; buffer for argument
 
-            mov rdx, [r12]              ; get argument
-            mov [rsi], rdx              ; store char in buffer
+            ;mov rdx, [r12]              ; get argument
+            ;mov [rsi], rdx              ; store char in buffer
 
-            call WriteStr             ; call 'write'
+            ;call WriteStr             ; call 'write'
 
-            add r12, 8                  ; r12 -> next argument
+            ;add r12, 8                  ; r12 -> next argument
 
             ret
 
@@ -307,11 +316,41 @@ WriteStr:
 
         ret
 
+;------------------WriteInBuf--------------------
+;
+; Descr:
+;
+; Entry:
+;
+; Exit :
+;
+; Destr:
+;------------------------------------------------
+
+WriteInBuf 
+
+        ret 
+
+;-------------------FlushBuf---------------------
+;
+; Descr:
+;
+; Entry:
+;
+; Exit :
+;
+; Destr:
+;------------------------------------------------
+
+FlushBuf
+
+        ret 
+
 ;------------------------------------------------
 
 [section .bss]
 
-PrintArgBuf: resb 64                 ; buffer used for itoa
+PrintBuf: resb 200                 ; buffer for RsPrint
 
 __SECT__
 
