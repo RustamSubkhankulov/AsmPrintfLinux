@@ -2,6 +2,10 @@
 ;                        (c) Rustam4ik, 2029 - 7
 ;================================================
 
+extern  CharUnitTest, StrUnitTest, DecUnitTest, OctUnitTest, HexUnitTest, BinUnitTest, PercUnitTest, DefUnitTest, ComplexUnitTest
+
+;================================================
+
 section .text 
 
 ;====================Macro=======================
@@ -44,19 +48,19 @@ section .text
 
 ;------------------------------------------------
 
-;==================Includes======================
+; ;==================Includes======================
 
-%include    "RsPrint.s"                      
-                                        ; printf function
-%include    "RsItoa.s"           
-                                        ; itoa function
+; %include    "RsPrint.s"                      
+;                                         ; printf function
+; %include    "RsItoa.s"           
+;                                         ; itoa function
 
-%include    "RsStrlen.s"                     
-                                        ; strlen function
+; %include    "RsStrlen.s"                     
+;                                         ; strlen function
 
-%include    "PrintUnitTests.s"                  
-                                        ; unit tests for 
-                                        ; printf function
+; %include    "PrintUnitTests.s"                  
+;                                         ; unit tests for 
+;                                         ; printf function
 
 ;================================================
 
