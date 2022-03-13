@@ -74,8 +74,8 @@ section .text
 
 ;================================================
 
-;global RsPrint
-global RsPrintC 
+global RsPrint
+global RsPrintC:function
 
 extern RsItoa,RsItoa2n
 
