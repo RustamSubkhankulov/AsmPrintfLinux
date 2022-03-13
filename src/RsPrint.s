@@ -1,3 +1,33 @@
+;====================MACRO=======================
+
+;------------------MultiPush---------------------
+
+%macro multipush 1-* 
+                                        ; >= 1 args
+    %rep %0                             
+                                        ; %0 == number of args
+        push %1                         ; push first arg
+        %rotate 1                       ; now second arg is first
+
+    %endrep 
+
+%endmacro
+
+;-------------------MultiPop---------------------
+
+%macro multipop 1-* 
+                                        ; >= 1 args
+    %rep %0 
+                                        ; %0 == number of args
+        %rotate -1                      ; previous arg is current
+        pop %1                          ; pop arg
+
+    %endrep 
+
+%endmacro
+
+;------------------------------------------------
+
 ;====================PRINTF======================
 
 ; 'Printf' assembler function made for
@@ -40,7 +70,7 @@
 
 ;================================================
 
-global RsPrint 
+global RsPrint, RsPrintC 
 
 extern RsItoa,RsItoa2n
 
@@ -50,6 +80,36 @@ section .text
 
 ;==================FUNCTIONS=====================
 
+;-------------------RsPrintC---------------------
+;
+; Descr: RsPrint shell for C ( according to 
+;                             Calling Convention)
+; Entry: RDI, RSI, RDX, RCX, R8, R9 - first six 
+;        arguments
+;        Other - in stack
+;
+; Exit : RAX == exit code 
+;
+; Destr: works according to calling convention 
+;------------------------------------------------
+
+RsPrintC:
+        pop rax                         ; pop return ip from stack
+        mov [RetAddr], rax              ; store it in variable 
+
+        multipush r9, r8, rcx, rdx, rsi, rdi 
+                                        ; push first 6 args
+
+        call RsPrint
+
+        multipop  r9, r8, rcx, rdx, rsi, rdi 
+                                        ; pop args 
+
+        push qword [RetAddr]            ; push return addr
+        xor rax, rax                    ; return value 
+
+        ret
+
 ;-------------------RsPrint----------------------
 ;
 ; Descr: Prints string in terminal
@@ -57,18 +117,23 @@ section .text
 ;        First arg  - format string
 ;        Next  args - arguments for format string
 ; Exit : None
-; Desrt: R8, RAX, RBX, RCX, R15, RDX, RSI, RDI, R13
+;
+; Desrt: R8, RAX, RCX, R11, RDX, RSI, RDI, R9, R10
+;
+; Saves: RBX
 ;-------------------------------------------------
 
 RsPrint:
             push rbp
             mov rbp, rsp                ; make stack frame
 
+            push rbx                    ; save rbx 
+
             mov rsi, [rbp + 16]         ; rbp -> start of format string
-            lea r12, [rbp + 24]         ; r12 -> first argument
+            lea r10, [rbp + 24]         ; r10 -> first argument
 
             xor rdx, rdx                ; counter of symbols
-            xor r13, r13                ; counter in PrintBuf
+            xor r9, r9                  ; counter in PrintBuf
 
         .loop:
             cmp byte [rsi + rdx], EOL   ; if there EOL
@@ -98,12 +163,13 @@ RsPrint:
             call WriteInBuf
 
         .flushcheck:
-            cmp r13, 0                  ; is buffer empty
+            cmp r9, 0                   ; is buffer empty
             je .ret                     ; jmp to ret if it is 
 
             call FlushBuf               ; final flush of buffer 
                                         ; if it is not empty
         .ret:
+            pop rbx                     ; restore rbx value 
             pop rbp                     ; restore rbp value
             ret
 
@@ -113,16 +179,16 @@ RsPrint:
 ;        according to specifier
 ;
 ; Entry: RSI + RDX -> %
-;        R12 -> next arg to be printed
+;        r10 -> next arg to be printed
 ;        RAX == 1 (write)
 ;        RDI == 1 (stdout)
 ;
 ; Exit : RDX == 0
 ;        RSI -> next symb after specifier
-;        R12 -> next argument in stack (+8)
-;        R13 == number of symbols in buffer
+;        r10 -> next argument in stack (+8)
+;        R9 == number of symbols in buffer
 ;
-; Destr: R8, RAX, RBX, RCX, R15, RDI
+; Destr: R8, RAX, RBX, RCX, R11, RDI
 ;------------------------------------------------
 
 PrintArg:
@@ -134,8 +200,8 @@ PrintArg:
             cmp r8, '%'
             jne .nodblpercent           ; '%%' case
 
-            mov byte [PrintBuf + r13], '%'
-            inc r13                     ; store one '%' in buffer
+            mov byte [PrintBuf + r9], '%'
+            inc r9                      ; store one '%' in buffer
             jmp .fin                    ; and jump to return
 
         .nodblpercent:
@@ -209,18 +275,18 @@ PrintArg:
 ;
 ; Entry: RCX = 10 for %d of 1,3 and 4 for
 ;        %b, %o and %x
-;        R12 -> current argument in stack
-;        R13 -> counter of symbols in buffer
+;        r10 -> current argument in stack
+;        R9  -> counter of symbols in buffer
 ;
-; Exit:  R12 -> next arg (+8)
-;        R13 = R13 + number of printed symbols
+; Exit:  r10 -> next arg (+8)
+;        R9  = R9 + number of printed symbols
 ;
-; Destr: RSI, RAX, RDX, RBX, R15, RDI 
+; Destr: RSI, RAX, RDX, RBX, r11, RDI 
 ;------------------------------------------------
 
 PrintArgNum:
-            lea rsi, [PrintBuf + r13]   ; write in PrintBuf
-            mov rbx, [r12]              ; get argument value
+            lea rsi, [PrintBuf + r9]    ; write in PrintBuf
+            mov rbx, [r10]              ; get argument value
 
             cmp rcx, 10
             je .decimal                 ; jmp if  %d (rcx == 10 )
@@ -236,9 +302,9 @@ PrintArgNum:
         .decimal:
             call RsItoa                 ; call Itoa for 10-numeric system
 
-        .skip
-            add r13, r8                 ; increment counter in buffer
-            add r12, 8                  ; r12 -> next argument
+        .skip:
+            add r9, r8                  ; increment counter in buffer
+            add r10, 8                  ; r10 -> next argument
 
             ret
 
@@ -246,22 +312,22 @@ PrintArgNum:
 ;
 ; Descr: Writes string argument
 ;
-; Entry: R12 -> current arguments ( address of string)
+; Entry: r10 -> current arguments ( address of string)
 ;
-; Exit : R12 -> next argument (+8)
+; Exit : r10 -> next argument (+8)
 ;
 ; Destr: RDX, RAX, RSI, RCX, RDI 
 ;------------------------------------------------
 
 PrintArgStr:
-            mov rsi, [r12]              ; rsi -> argument string
+            mov rsi, [r10]              ; rsi -> argument string
             
             xor rdx, rdx 
             neg rdx                     ; rdx = maximum value
 
             call WriteInBuf             ; store argument in buffer
 
-            add r12, 8                  ; r12 -> next arg
+            add r10, 8                  ; r10 -> next arg
 
             ret
 
@@ -269,21 +335,21 @@ PrintArgStr:
 ;
 ; Descr: Writes char argument in terminal
 ;
-; Entry: R12 -> current argument
-;        R13 - counter of symbols in buffer
+; Entry: r10 -> current argument
+;        R9 - counter of symbols in buffer
 ;
-; Exit:  R12 -> next argument (+8)
-;        R13 += 1
+; Exit:  r10 -> next argument (+8)
+;        R9 += 1
 ;
 ; Destr: RDX
 ;------------------------------------------------
 
 PrintArgChar:
-            mov dl, [r12]
-            mov [PrintBuf + r13], dl    ; store arg in buffer
+            mov dl, [r10]
+            mov [PrintBuf + r9], dl     ; store arg in buffer
 
-            inc r13                     ; inc counter in buffer
-            add r12, 8                  ; r12 -> next argument
+            inc r9                     ; inc counter in buffer
+            add r10, 8                  ; r10 -> next argument
 
             ret
 
@@ -298,7 +364,7 @@ PrintArgChar:
 ;
 ; Exit : RSI = RSI + RDX (number of symbols 
 ;                         written in buffer)
-;        R13 = number of symbols in buffer
+;        R9  = number of symbols in buffer
 ;
 ; Destr: RCX, RDX, RDI 
 ;------------------------------------------------
@@ -306,7 +372,7 @@ PrintArgChar:
 WriteInBuf:
         mov rcx, rdx                    ; rcx = counter of symbols to be moved
                                         ; to buffer 
-        cmp r13, BufSize
+        cmp r9, BufSize
         jbe .loop                       ; flush buffer if it is full
                                         ; else skip 
         call FlushBuf                              
@@ -317,12 +383,12 @@ WriteInBuf:
         cmp dl, 0
         je .ret                         ; stop if *src == \0
 
-        mov byte [PrintBuf + r13], dl   ; store byte in PrintBuf 
+        mov byte [PrintBuf + r9], dl    ; store byte in PrintBuf 
 
         inc rsi                         ; iterate to next symbol
 
-        inc r13                         ; increment counter in buffer
-        cmp r13, BufSize
+        inc r9                          ; increment counter in buffer
+        cmp r9, BufSize
         jb .noflush                     ; no flush if buffer is not full
 
         call FlushBuf                   ; else flush buffer
@@ -330,7 +396,7 @@ WriteInBuf:
     .noflush: 
         loop .loop                      ; repeat rcx times
 
-    .ret
+    .ret:
         ret 
 
 ;-------------------FlushBuf---------------------
@@ -338,9 +404,9 @@ WriteInBuf:
 ; Descr: flushes bytes from PrintBuf to terminal
 ;        using 'write' 01h syscall
 ;
-; Entry: R13 -> counter of symbols in buffer
+; Entry: R9 -> counter of symbols in buffer
 ;
-; Exit : R13 == 0
+; Exit : R9 == 0
 ;        RAX == number of symbols printed 
 ;
 ; Destr: RDI, RDX 
@@ -351,14 +417,14 @@ FlushBuf:
         push rcx                        ; being corrupted by syscall
 
         mov rax, WRITE                  ; 'write' syscall
-        mov rdx, r13                    ; rdx = number of symbols 
+        mov rdx, r9                     ; rdx = number of symbols 
         mov rdi, STDOUT                 ; to stdout 
 
         lea rsi, [PrintBuf]             ; from PrintBuf
 
         syscall                         ; call 'write'
 
-        xor r13, r13                    ; PrintBuf is now empty
+        xor r9, r9                      ; PrintBuf is now empty
 
         pop rcx 
         pop rsi                         ; restore rsi and rcx values
@@ -368,6 +434,8 @@ FlushBuf:
 ;------------------------------------------------
 
 [section .bss]
+
+RetAddr:  resq 1                        ; Return Address for RsPrintC  
 
 PrintBuf: resb RealBufSize              ; buffer for RsPrint
 

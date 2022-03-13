@@ -22,7 +22,7 @@ section .text
 ;        RCX - base of numeric system 
 ;        RBX - number to be translated
 ;
-; Destr: RAX, RDX, R15 
+; Destr: RAX, RDX, R11
 ;------------------------------------------------
 
 RsItoa:
@@ -43,12 +43,12 @@ RsItoa:
 
     .main:
         mov rax, rbx                    ; get value again
-        mov r15, rcx                    ; r15 == base 
+        mov r11, rcx                    ; r11 == base 
         mov rcx, r8                     ; get number of symbols
 
     .loop:
         xor rdx, rdx                    ; for division
-        div r15                         ; divide by base 
+        div r11                         ; divide by base 
 
         mov dl, [rdx + XlatTable64]     ; converting symbol
 
