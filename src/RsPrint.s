@@ -42,7 +42,7 @@
 
 global RsPrint 
 
-extern RsStrlen, RsItoa,RsItoa2n
+extern RsItoa,RsItoa2n
 
 ;================================================
 
@@ -369,7 +369,7 @@ FlushBuf:
 
 [section .bss]
 
-PrintBuf: resb BufSize + 64              ; buffer for RsPrint
+PrintBuf: resb RealBufSize              ; buffer for RsPrint
 
 __SECT__
 

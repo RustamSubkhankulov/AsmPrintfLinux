@@ -179,7 +179,7 @@ OctUnitTest:
 
 HexUnitTest:
 
-        push 25f25Ah
+        push 3802d
         push HexFormatStr
         
         call RsPrint
@@ -313,7 +313,7 @@ OctFormatStr:   db "Testing %%o: number 30 - %o", 0Ah, 0
 
 ;------------------------------------------------
 
-HexFormatStr:   db "Testing %%x: 25F25A - %x", 0Ah, 0
+HexFormatStr:   db "Testing %%x: 3802d - %x", 0Ah, 0
 
 ;------------------------------------------------
 
