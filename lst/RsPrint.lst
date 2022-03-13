@@ -1,0 +1,514 @@
+     1                                  ;====================MACRO=======================
+     2                                  
+     3                                  ;------------------MultiPush---------------------
+     4                                  
+     5                                  %macro multipush 1-* 
+     6                                                                          ; >= 1 args
+     7                                      %rep %0                             
+     8                                                                          ; %0 == number of args
+     9                                          push %1                         ; push first arg
+    10                                          %rotate 1                       ; now second arg is first
+    11                                  
+    12                                      %endrep 
+    13                                  
+    14                                  %endmacro
+    15                                  
+    16                                  ;-------------------MultiPop---------------------
+    17                                  
+    18                                  %macro multipop 1-* 
+    19                                                                          ; >= 1 args
+    20                                      %rep %0 
+    21                                                                          ; %0 == number of args
+    22                                          %rotate -1                      ; previous arg is current
+    23                                          pop %1                          ; pop arg
+    24                                  
+    25                                      %endrep 
+    26                                  
+    27                                  %endmacro
+    28                                  
+    29                                  ;------------------------------------------------
+    30                                  
+    31                                  ;====================PRINTF======================
+    32                                  
+    33                                  ; 'Printf' assembler function made for
+    34                                  ;                         Linux x86_64
+    35                                  ;
+    36                                  ; File consists unit tests for functions
+    37                                  ; Includes STRLIB library
+    38                                  
+    39                                  ; %s - '0'-terminated string
+    40                                  ; %c - symbol
+    41                                  ; %d - decimal
+    42                                  ; %x - hexidecimal
+    43                                  ; %o - octagonal
+    44                                  ; %b - binary
+    45                                  
+    46                                  ;   b   c   d   o   s   x
+    47                                  ;   1d  2d  3d  14d 18d 23d
+    48                                  ;   62h 63h 64h 6Fh 73h 78h
+    49                                  
+    50                                  ;================================================
+    51                                  
+    52                                  %define EOL     0                       
+    53                                                                          ; end of line 
+    54                                  %define WRITE   1
+    55                                                                          ; 'write' syscall code 
+    56                                  
+    57                                  %define STDOUT  1                       
+    58                                                                          ; stdout fd 
+    59                                  
+    60                                  %define BufSize 10d                     
+    61                                                                          ; size of buffer for RsPrint
+    62                                  
+    63                                  %define RealBufSize BufSize + 64            
+    64                                                                          ; real size of PrintBuf
+    65                                  
+    66                                  ;================================================
+    67                                  
+    68                                  %ifndef rsPrint
+    69                                  %define rsPrint
+    70                                  
+    71                                  ;================================================
+    72                                  
+    73                                  section .text
+    74                                  
+    75                                  ;================================================
+    76                                  
+    77                                  ;global RsPrint
+    78                                  global RsPrintC 
+    79                                  
+    80                                  extern RsItoa,RsItoa2n
+    81                                  
+    82                                  ;==================FUNCTIONS=====================
+    83                                  
+    84                                  ;-------------------RsPrintC---------------------
+    85                                  ;
+    86                                  ; Descr: RsPrint shell for C ( according to 
+    87                                  ;                             Calling Convention)
+    88                                  ; Entry: RDI, RSI, RDX, RCX, R8, R9 - first six 
+    89                                  ;        arguments
+    90                                  ;        Other - in stack
+    91                                  ;
+    92                                  ; Exit : RAX == exit code 
+    93                                  ;
+    94                                  ; Destr: works according to calling convention 
+    95                                  ;------------------------------------------------
+    96                                  
+    97                                  RsPrintC:
+    98 00000000 58                              pop rax                         ; pop return ip from stack
+    99 00000001 48890425[00000000]              mov [RetAddr], rax              ; store it in variable 
+   100                                  
+   101                                          multipush r9, r8, rcx, rdx, rsi, rdi 
+   101                              <1> 
+   101                              <1>  %rep %0
+   101                              <1> 
+   101                              <1>  push %1
+   101                              <1>  %rotate 1
+   101                              <1> 
+   101                              <1>  %endrep
+   101                              <2> 
+   101 00000009 4151                <2>  push %1
+   101                              <2>  %rotate 1
+   101                              <2> 
+   101                              <2> 
+   101 0000000B 4150                <2>  push %1
+   101                              <2>  %rotate 1
+   101                              <2> 
+   101                              <2> 
+   101 0000000D 51                  <2>  push %1
+   101                              <2>  %rotate 1
+   101                              <2> 
+   101                              <2> 
+   101 0000000E 52                  <2>  push %1
+   101                              <2>  %rotate 1
+   101                              <2> 
+   101                              <2> 
+   101 0000000F 56                  <2>  push %1
+   101                              <2>  %rotate 1
+   101                              <2> 
+   101                              <2> 
+   101 00000010 57                  <2>  push %1
+   101                              <2>  %rotate 1
+   101                              <2> 
+   101                              <1> 
+   102                                                                          ; push first 6 args
+   103                                  
+   104 00000011 E813000000                      call RsPrint
+   105                                  
+   106                                          multipop  r9, r8, rcx, rdx, rsi, rdi 
+   106                              <1> 
+   106                              <1>  %rep %0
+   106                              <1> 
+   106                              <1>  %rotate -1
+   106                              <1>  pop %1
+   106                              <1> 
+   106                              <1>  %endrep
+   106                              <2> 
+   106                              <2>  %rotate -1
+   106 00000016 5F                  <2>  pop %1
+   106                              <2> 
+   106                              <2> 
+   106                              <2>  %rotate -1
+   106 00000017 5E                  <2>  pop %1
+   106                              <2> 
+   106                              <2> 
+   106                              <2>  %rotate -1
+   106 00000018 5A                  <2>  pop %1
+   106                              <2> 
+   106                              <2> 
+   106                              <2>  %rotate -1
+   106 00000019 59                  <2>  pop %1
+   106                              <2> 
+   106                              <2> 
+   106                              <2>  %rotate -1
+   106 0000001A 4158                <2>  pop %1
+   106                              <2> 
+   106                              <2> 
+   106                              <2>  %rotate -1
+   106 0000001C 4159                <2>  pop %1
+   106                              <2> 
+   106                              <1> 
+   107                                                                          ; pop args 
+   108                                  
+   109 0000001E FF3425[00000000]                push qword [RetAddr]            ; push return addr
+   110 00000025 4831C0                          xor rax, rax                    ; return value 
+   111                                  
+   112 00000028 C3                              ret
+   113                                  
+   114                                  ;-------------------RsPrint----------------------
+   115                                  ;
+   116                                  ; Descr: Prints string in terminal
+   117                                  ; Entry: Gains arguments in stack (CDECL)
+   118                                  ;        First arg  - format string
+   119                                  ;        Next  args - arguments for format string
+   120                                  ; Exit : None
+   121                                  ;
+   122                                  ; Desrt: R8, RAX, RCX, R11, RDX, RSI, RDI, R9, R10
+   123                                  ;
+   124                                  ; Saves: RBX
+   125                                  ;-------------------------------------------------
+   126                                  
+   127                                  RsPrint:
+   128 00000029 55                                  push rbp
+   129 0000002A 4889E5                              mov rbp, rsp                ; make stack frame
+   130                                  
+   131 0000002D 53                                  push rbx                    ; save rbx 
+   132                                  
+   133 0000002E 488B7510                            mov rsi, [rbp + 16]         ; rbp -> start of format string
+   134 00000032 4C8D5518                            lea r10, [rbp + 24]         ; r10 -> first argument
+   135                                  
+   136 00000036 4831D2                              xor rdx, rdx                ; counter of symbols
+   137 00000039 4D31C9                              xor r9, r9                  ; counter in PrintBuf
+   138                                  
+   139                                          .loop:
+   140 0000003C 803C1600                            cmp byte [rsi + rdx], EOL   ; if there EOL
+   141 00000040 741D                                je .fin
+   142                                  
+   143 00000042 803C1625                            cmp byte [rsi + rdx], '%'   ; if there specifier
+   144 00000046 7405                                je .write
+   145                                  
+   146 00000048 48FFC2                              inc rdx                     ; to next symbol
+   147 0000004B EBEF                                jmp .loop
+   148                                  
+   149                                          .write:
+   150 0000004D 4883FA00                            cmp rdx, 0                  ; if counter == 0
+   151 00000051 7405                                je .arg                     ; no need to write
+   152                                  
+   153 00000053 E8A3010000                          call WriteInBuf             ; write symbols from format 
+   154                                                                          ; string in buffer
+   155                                  
+   156                                          .arg:
+   157 00000058 E81B000000                          call PrintArg               ; print argument
+   158 0000005D EBDD                                jmp .loop
+   159                                  
+   160                                          .fin:
+   161 0000005F 4883FA00                            cmp rdx, 0                  ; if counter == 0
+   162 00000063 7405                                je .flushcheck              ; no need to write
+   163                                                                          ; but buffer can be not empty
+   164 00000065 E891010000                          call WriteInBuf
+   165                                  
+   166                                          .flushcheck:
+   167 0000006A 4983F900                            cmp r9, 0                   ; is buffer empty
+   168 0000006E 7405                                je .ret                     ; jmp to ret if it is 
+   169                                  
+   170 00000070 E8B6010000                          call FlushBuf               ; final flush of buffer 
+   171                                                                          ; if it is not empty
+   172                                          .ret:
+   173 00000075 5B                                  pop rbx                     ; restore rbx value 
+   174 00000076 5D                                  pop rbp                     ; restore rbp value
+   175 00000077 C3                                  ret
+   176                                  
+   177                                  ;-------------------PrintArg----------------------
+   178                                  ;
+   179                                  ; Descr: Prints in terminal argument in the way
+   180                                  ;        according to specifier
+   181                                  ;
+   182                                  ; Entry: RSI + RDX -> %
+   183                                  ;        r10 -> next arg to be printed
+   184                                  ;        RAX == 1 (write)
+   185                                  ;        RDI == 1 (stdout)
+   186                                  ;
+   187                                  ; Exit : RDX == 0
+   188                                  ;        RSI -> next symb after specifier
+   189                                  ;        r10 -> next argument in stack (+8)
+   190                                  ;        R9 == number of symbols in buffer
+   191                                  ;
+   192                                  ; Destr: R8, RAX, RBX, RCX, R11, RDI
+   193                                  ;------------------------------------------------
+   194                                  
+   195                                  PrintArg:
+   196 00000078 56                                  push rsi                    ; save current pos in format string
+   197                                  
+   198 00000079 4C0FB64601                          movzx r8, byte [rsi + 1]
+   199                                                                          ; get next symbol after '%'
+   200                                  
+   201 0000007E 4983F825                            cmp r8, '%'
+   202 00000082 7510                                jne .nodblpercent           ; '%%' case
+   203                                  
+   204 00000084 41C681[08000000]25                  mov byte [PrintBuf + r9], '%'
+   205 0000008C 49FFC1                              inc r9                      ; store one '%' in buffer
+   206 0000008F E90A010000                          jmp .fin                    ; and jump to return
+   207                                  
+   208                                          .nodblpercent:
+   209 00000094 4983E862                            sub r8, 'b'                 ; r8 = offset of the symbol
+   210                                                                          ; from 'b' in ASCII table
+   211                                  
+   212 00000098 4983F877                            cmp r8, 'x' - 1             ; if specifier is not recognized
+   213 0000009C 0F87F2000000                        ja .casedefault             ; print two symbol incuding '%'
+   214                                  
+   215 000000A2 4E8B04C5[AD000000]                  mov r8, [.jmptable + r8 * 8]
+   216 000000AA 41FFE0                              jmp r8                      ; else jmp using table
+   217                                  
+   218                                          .jmptable:
+   219 000000AD [6501000000000000]                  dq .binary                  ; %b
+   220 000000B5 [8601000000000000]                  dq .char                    ; %c
+   221 000000BD [7A01000000000000]                  dq .decimal                 ; %d
+   222                                  
+   223 000000C5 [9401000000000000]-                 times 'n' - 'd' dq .casedefault
+   223 000000C5 <rept>             
+   224                                  
+   225 00000115 [6C01000000000000]                  dq .octagonal               ; %o
+   226                                  
+   227 0000011D [9401000000000000]-                 times 'r' - 'o' dq .casedefault
+   227 0000011D <rept>             
+   228                                  
+   229 00000135 [8D01000000000000]                  dq .string                  ; %s
+   230                                  
+   231 0000013D [9401000000000000]-                 times 'w' - 's' dq .casedefault
+   231 0000013D <rept>             
+   232                                  
+   233 0000015D [7301000000000000]                  dq .hexadecimal             ; %x
+   234                                  
+   235                                          .binary:
+   236 00000165 B901000000                          mov rcx, 1
+   237 0000016A EB13                                jmp .casenum
+   238                                  
+   239                                          .octagonal:
+   240 0000016C B903000000                          mov rcx, 3
+   241 00000171 EB0C                                jmp .casenum
+   242                                  
+   243                                          .hexadecimal:
+   244 00000173 B904000000                          mov rcx, 4
+   245 00000178 EB05                                jmp .casenum
+   246                                  
+   247                                          .decimal:
+   248 0000017A B90A000000                          mov rcx, 10
+   249                                              
+   250                                          .casenum:
+   251 0000017F E823000000                          call PrintArgNum
+   252 00000184 EB18                                jmp .fin 
+   253                                  
+   254                                          .char:
+   255 00000186 E85E000000                          call PrintArgChar
+   256 0000018B EB11                                jmp .fin
+   257                                  
+   258                                          .string:
+   259 0000018D E844000000                          call PrintArgStr
+   260 00000192 EB0A                                jmp .fin
+   261                                  
+   262                                          .casedefault:
+   263 00000194 BA02000000                          mov rdx, 2                  ; store two symbols in buffer
+   264 00000199 E85D000000                          call WriteInBuf             ; '%' and next after it 
+   265                                  
+   266                                          .fin:
+   267 0000019E 4831D2                              xor rdx, rdx                ; counter = 0
+   268 000001A1 5E                                  pop rsi                     ; restore rsi value
+   269 000001A2 4883C602                            add rsi, 2                  ; rsi -> next sym after specifier
+   270                                  
+   271 000001A6 C3                                  ret
+   272                                  
+   273                                  ;-------------------PrintArgNum------------------
+   274                                  ;
+   275                                  ; Descr: writes %d, %b, %o or %x argument
+   276                                  ;
+   277                                  ; Entry: RCX = 10 for %d of 1,3 and 4 for
+   278                                  ;        %b, %o and %x
+   279                                  ;        r10 -> current argument in stack
+   280                                  ;        R9  -> counter of symbols in buffer
+   281                                  ;
+   282                                  ; Exit:  r10 -> next arg (+8)
+   283                                  ;        R9  = R9 + number of printed symbols
+   284                                  ;
+   285                                  ; Destr: RSI, RAX, RDX, RBX, r11, RDI 
+   286                                  ;------------------------------------------------
+   287                                  
+   288                                  PrintArgNum:
+   289 000001A7 498DB1[08000000]                    lea rsi, [PrintBuf + r9]    ; write in PrintBuf
+   290 000001AE 498B1A                              mov rbx, [r10]              ; get argument value
+   291                                  
+   292 000001B1 4883F90A                            cmp rcx, 10
+   293 000001B5 7412                                je .decimal                 ; jmp if  %d (rcx == 10 )
+   294                                  
+   295 000001B7 BA01000000                          mov rdx, 1
+   296 000001BC 48D3E2                              shl rdx, cl                 ; counting mask for Itoa2n
+   297 000001BF 48FFCA                              dec rdx                     ; rdx = 2^n - 1 (mask)
+   298                                  
+   299 000001C2 E8(00000000)                        call RsItoa2n               ; get string in buffer
+   300                                                                          ; rsi remains its value
+   301 000001C7 EB05                                jmp .skip                   ; rdi still equals 1
+   302                                  
+   303                                          .decimal:
+   304 000001C9 E8(00000000)                        call RsItoa                 ; call Itoa for 10-numeric system
+   305                                  
+   306                                          .skip:
+   307 000001CE 4D01C1                              add r9, r8                  ; increment counter in buffer
+   308 000001D1 4983C208                            add r10, 8                  ; r10 -> next argument
+   309                                  
+   310 000001D5 C3                                  ret
+   311                                  
+   312                                  ;-------------------PrintArgStr------------------
+   313                                  ;
+   314                                  ; Descr: Writes string argument
+   315                                  ;
+   316                                  ; Entry: r10 -> current arguments ( address of string)
+   317                                  ;
+   318                                  ; Exit : r10 -> next argument (+8)
+   319                                  ;
+   320                                  ; Destr: RDX, RAX, RSI, RCX, RDI 
+   321                                  ;------------------------------------------------
+   322                                  
+   323                                  PrintArgStr:
+   324 000001D6 498B32                              mov rsi, [r10]              ; rsi -> argument string
+   325                                              
+   326 000001D9 4831D2                              xor rdx, rdx 
+   327 000001DC 48F7DA                              neg rdx                     ; rdx = maximum value
+   328                                  
+   329 000001DF E817000000                          call WriteInBuf             ; store argument in buffer
+   330                                  
+   331 000001E4 4983C208                            add r10, 8                  ; r10 -> next arg
+   332                                  
+   333 000001E8 C3                                  ret
+   334                                  
+   335                                  ;-------------------PrintArgChar-----------------
+   336                                  ;
+   337                                  ; Descr: Writes char argument in terminal
+   338                                  ;
+   339                                  ; Entry: r10 -> current argument
+   340                                  ;        R9 - counter of symbols in buffer
+   341                                  ;
+   342                                  ; Exit:  r10 -> next argument (+8)
+   343                                  ;        R9 += 1
+   344                                  ;
+   345                                  ; Destr: RDX
+   346                                  ;------------------------------------------------
+   347                                  
+   348                                  PrintArgChar:
+   349 000001E9 418A12                              mov dl, [r10]
+   350 000001EC 418891[08000000]                    mov [PrintBuf + r9], dl     ; store arg in buffer
+   351                                  
+   352 000001F3 49FFC1                              inc r9                     ; inc counter in buffer
+   353 000001F6 4983C208                            add r10, 8                  ; r10 -> next argument
+   354                                  
+   355 000001FA C3                                  ret
+   356                                  
+   357                                  ;------------------WriteInBuf--------------------
+   358                                  ;
+   359                                  ; Descr: copies RDX bytes from RSI to PrintBuf
+   360                                  ;
+   361                                  ; Note: stops copying if *src == \0
+   362                                  ;
+   363                                  ; Entry: RDX == number of symbols to be written
+   364                                  ;        RSI -> source 
+   365                                  ;
+   366                                  ; Exit : RSI = RSI + RDX (number of symbols 
+   367                                  ;                         written in buffer)
+   368                                  ;        R9  = number of symbols in buffer
+   369                                  ;
+   370                                  ; Destr: RCX, RDX, RDI 
+   371                                  ;------------------------------------------------
+   372                                  
+   373                                  WriteInBuf:
+   374 000001FB 4889D1                          mov rcx, rdx                    ; rcx = counter of symbols to be moved
+   375                                                                          ; to buffer 
+   376 000001FE 4983F90A                        cmp r9, BufSize
+   377 00000202 7605                            jbe .loop                       ; flush buffer if it is full
+   378                                                                          ; else skip 
+   379 00000204 E822000000                      call FlushBuf                              
+   380                                  
+   381                                      .loop:
+   382 00000209 8A16                            mov dl, byte [rsi]              ; get one byte from src 
+   383                                  
+   384 0000020B 80FA00                          cmp dl, 0
+   385 0000020E 741A                            je .ret                         ; stop if *src == \0
+   386                                  
+   387 00000210 418891[08000000]                mov byte [PrintBuf + r9], dl    ; store byte in PrintBuf 
+   388                                  
+   389 00000217 48FFC6                          inc rsi                         ; iterate to next symbol
+   390                                  
+   391 0000021A 49FFC1                          inc r9                          ; increment counter in buffer
+   392 0000021D 4983F90A                        cmp r9, BufSize
+   393 00000221 7205                            jb .noflush                     ; no flush if buffer is not full
+   394                                  
+   395 00000223 E803000000                      call FlushBuf                   ; else flush buffer
+   396                                  
+   397                                      .noflush: 
+   398 00000228 E2DF                            loop .loop                      ; repeat rcx times
+   399                                  
+   400                                      .ret:
+   401 0000022A C3                              ret 
+   402                                  
+   403                                  ;-------------------FlushBuf---------------------
+   404                                  ;
+   405                                  ; Descr: flushes bytes from PrintBuf to terminal
+   406                                  ;        using 'write' 01h syscall
+   407                                  ;
+   408                                  ; Entry: R9 -> counter of symbols in buffer
+   409                                  ;
+   410                                  ; Exit : R9 == 0
+   411                                  ;        RAX == number of symbols printed 
+   412                                  ;
+   413                                  ; Destr: RDI, RDX 
+   414                                  ;------------------------------------------------
+   415                                  
+   416                                  FlushBuf:
+   417 0000022B 56                              push rsi                        ; save position in source
+   418 0000022C 51                              push rcx                        ; being corrupted by syscall
+   419                                  
+   420 0000022D B801000000                      mov rax, WRITE                  ; 'write' syscall
+   421 00000232 4C89CA                          mov rdx, r9                     ; rdx = number of symbols 
+   422 00000235 BF01000000                      mov rdi, STDOUT                 ; to stdout 
+   423                                  
+   424 0000023A 488D3425[08000000]              lea rsi, [PrintBuf]             ; from PrintBuf
+   425                                  
+   426 00000242 0F05                            syscall                         ; call 'write'
+   427                                  
+   428 00000244 4D31C9                          xor r9, r9                      ; PrintBuf is now empty
+   429                                  
+   430 00000247 59                              pop rcx 
+   431 00000248 5E                              pop rsi                         ; restore rsi and rcx values
+   432                                  
+   433 00000249 C3                              ret                            
+   434                                  
+   435                                  ;------------------------------------------------
+   436                                  
+   437                                  [section .bss]
+   438                                  
+   439 00000000 <res 00000008>          RetAddr:  resq 1                        ; Return Address for RsPrintC  
+   440                                  
+   441 00000008 <res 0000004A>          PrintBuf: resb RealBufSize              ; buffer for RsPrint
+   442                                  
+   443                                  __SECT__
+   444                                  
+   445                                  ;================================================
+   446                                  
+   447                                  %endif

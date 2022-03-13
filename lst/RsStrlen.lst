@@ -1,0 +1,48 @@
+     1                                  %ifndef rsStrlen
+     2                                  %define rsStrlen 
+     3                                  
+     4                                  ;================================================
+     5                                  
+     6                                  global RsStrlen
+     7                                  
+     8                                  ;================================================
+     9                                  
+    10                                  section .text 
+    11                                  
+    12                                  ;===================FUNCTIONS====================
+    13                                  
+    14                                  ;--------------------RsStrlen--------------------
+    15                                  ;
+    16                                  ; Descr:   count lenght of the null-terimanted 
+    17                                  ;                                       string
+    18                                  ; Entry:   RSI - address of the string
+    19                                  ;
+    20                                  ; Exit:    RCX - lenght of the string
+    21                                  ;          RSI remains its value
+    22                                  ;
+    23                                  ; Desrt:   none
+    24                                  ;-------------------------------------------------
+    25                                  
+    26                                  RsStrlen:    
+    27 00000000 56                                  push rsi                    ; save rsi value
+    28                                  
+    29 00000001 4831C9                              xor rcx, rcx
+    30 00000004 48F7D9                              neg rcx                     ; rcx == 0xFFFFFFFFFFFFFFFF
+    31                                              
+    32                                          .loop:
+    33 00000007 803E00                              cmp byte [rsi], 0
+    34 0000000A 7405                                je .ret                     ; if ([rdi] == 0) stop
+    35                                  
+    36 0000000C 48FFC6                              inc rsi                     ; iterate to next symb
+    37 0000000F E2F6                                loop .loop                  ; while ([di] != 0)
+    38                                  
+    39                                          .ret: 
+    40 00000011 48F7D9                              neg rcx      
+    41                                  
+    42 00000014 5E                                  pop rsi                     ; restore rsi value 
+    43                                  
+    44 00000015 C3                                  ret 
+    45                                  
+    46                                  ;================================================
+    47                                  
+    48                                  %endif
