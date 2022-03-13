@@ -78,6 +78,7 @@ global RsPrint
 global RsPrintC:function
 
 extern RsItoa,RsItoa2n
+;extern printf 
 
 ;==================FUNCTIONS=====================
 
@@ -108,6 +109,8 @@ RsPrintC:
 
         push qword [RetAddr]            ; push return addr
         xor rax, rax                    ; return value 
+
+        ;call printf 
 
         ret
 
