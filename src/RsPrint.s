@@ -70,13 +70,14 @@
 
 ;================================================
 
-global RsPrint, RsPrintC 
-
-extern RsItoa,RsItoa2n
+section .text
 
 ;================================================
 
-section .text
+;global RsPrint
+global RsPrintC 
+
+extern RsItoa,RsItoa2n
 
 ;==================FUNCTIONS=====================
 
