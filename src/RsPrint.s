@@ -78,7 +78,7 @@ global RsPrint
 global RsPrintC:function
 
 extern RsItoa,RsItoa2n
-;extern printf 
+extern printf 
 
 ;==================FUNCTIONS=====================
 
@@ -107,10 +107,12 @@ RsPrintC:
         multipop  r9, r8, rcx, rdx, rsi, rdi 
                                         ; pop args 
 
-        push qword [RetAddr]            ; push return addr
-        xor rax, rax                    ; return value 
+        ;push qword [RetAddr]            ; push return addr
+        
+        xor rax, rax                    ; number of float parameters 
+        call printf 
 
-        ;call printf 
+        push qword [RetAddr]            ; push return addr
 
         ret
 
