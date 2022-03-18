@@ -1,0 +1,32 @@
+     1                                  global main
+     2                                  
+     3                                  extern mysub 
+     4                                  extern kinda_printf
+     5                                  
+     6                                  section .text
+     7                                  
+     8                                  main:
+     9                                  
+    10 00000000 BF0A000000              	mov rdi, 10
+    11 00000005 BE02000000              	mov rsi, 2 
+    12                                  
+    13 0000000A E8(00000000)            	call mysub 
+    14                                  
+    15 0000000F BE0D000000              	mov rsi, 13
+    16                                  	
+    17 00000014 488D3C25[00000000]      	lea rdi, [String]
+    18 0000001C B800000000              	mov rax, 0
+    19                                  
+    20 00000021 E8(00000000)            	call kinda_printf
+    21                                  	
+    22                                  	;mov rdi, [stdout]
+    23                                  	;call fflush
+    24                                  	
+    25 00000026 B83C000000              	mov rax, 0x3c	; exit (rdi)
+    26 0000002B 4831FF                  	xor rdi, rdi
+    27 0000002E 0F05                    	syscall
+    28                                  
+    29                                  section .data
+    30                                  
+    31 00000000 48656C6C6F20576F72-     String db "Hello World %d", 0Ah, 0
+    31 00000009 6C642025640A00     
