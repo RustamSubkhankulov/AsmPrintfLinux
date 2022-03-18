@@ -110,7 +110,7 @@ RsPrintC:
         ;push qword [RetAddr]            ; push return addr
         
         xor rax, rax                    ; number of float parameters 
-        call printf 
+        ;call printf 
 
         push qword [RetAddr]            ; push return addr
 

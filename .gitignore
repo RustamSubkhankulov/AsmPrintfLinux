@@ -3,3 +3,4 @@ HelloWorld
 src/RsStrlen.s
 main
 CPrintTest
+CfromAsm/obj
