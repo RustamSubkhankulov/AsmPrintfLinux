@@ -1,14 +1,14 @@
-global main
+global _start
 
 extern mysub 
 extern kinda_printf
 
 section .text
 
-main:
+_start:
 
 	mov rdi, 10
-	mov rsi, 2 
+	mov rsi, 11
 
 	call mysub 
 
