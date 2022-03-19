@@ -17,7 +17,20 @@ _start:
                     ; format string 
 	mov rax, 0      ; number of float args 
 
+	mov rsi, 1 
+	mov rdx, 2
+	mov rcx, 3 
+	mov r8 , 4 
+	mov r9 , 5
+
+	push 9
+	push 8 
+	push 7 
+	push 6
+
 	call printf     ; call standart printf
+
+	add rsp, 32
 	
 	;mov rdi, [stdout]
 	;call fflush
@@ -30,4 +43,4 @@ _start:
 
 section .data
 
-Format db "Hello World", 0Ah, 0
+Format db "Hello World %d %d %d %d %d %d %d %d %d ", 0Ah, 0

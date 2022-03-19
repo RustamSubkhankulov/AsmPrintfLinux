@@ -2,7 +2,7 @@
      2                                  ;                        (c) Rustam4ik, 2029 - 7
      3                                  ;================================================
      4                                  
-     5                                  extern printf
+     5                                  extern printf      
      6                                  
      7                                  ;================================================
      8                                  
@@ -10,24 +10,41 @@
     10                                  
     11                                  ;==================MainBody======================
     12                                  
-    13                                  global _start 
+    13                                  global _start       
     14                                  _start:
     15                                  
     16 00000000 488D3C25[00000000]      	lea rdi, [Format]
-    17 00000008 B800000000              	mov rax, 0
-    18                                  
-    19 0000000D E8(00000000)            	call printf
-    20                                  	
-    21                                  	;mov rdi, [stdout]
-    22                                  	;call fflush
-    23                                  	
-    24 00000012 B83C000000              	mov rax, 0x3c	; exit (rdi)
-    25 00000017 4831FF                  	xor rdi, rdi
-    26 0000001A 0F05                    	syscall
-    27                                  
-    28                                  ;================================================
-    29                                  
-    30                                  section .data
-    31                                  
-    32 00000000 48656C6C6F20576F72-     Format db "Hello World %d", 0Ah, 0
-    32 00000009 6C642025640A00     
+    17                                                      ; format string 
+    18 00000008 B800000000              	mov rax, 0      ; number of float args 
+    19                                  
+    20 0000000D BE01000000              	mov rsi, 1 
+    21 00000012 BA02000000              	mov rdx, 2
+    22 00000017 B903000000              	mov rcx, 3 
+    23 0000001C 41B804000000            	mov r8 , 4 
+    24 00000022 41B905000000            	mov r9 , 5
+    25                                  
+    26 00000028 6A09                    	push 9
+    27 0000002A 6A08                    	push 8 
+    28 0000002C 6A07                    	push 7 
+    29 0000002E 6A06                    	push 6
+    30                                  
+    31 00000030 E8(00000000)            	call printf     ; call standart printf
+    32                                  
+    33 00000035 4883C420                	add rsp, 32
+    34                                  	
+    35                                  	;mov rdi, [stdout]
+    36                                  	;call fflush
+    37                                  	
+    38 00000039 B83C000000              	mov rax, 0x3c	; exit function syscall code  
+    39 0000003E 4831FF                  	xor rdi, rdi    ; exit code
+    40 00000041 0F05                    	syscall         
+    41                                  
+    42                                  ;================================================
+    43                                  
+    44                                  section .data
+    45                                  
+    46 00000000 48656C6C6F20576F72-     Format db "Hello World %d %d %d %d %d %d %d %d %d ", 0Ah, 0
+    46 00000009 6C6420256420256420-
+    46 00000012 256420256420256420-
+    46 0000001B 256420256420256420-
+    46 00000024 2564200A00         
